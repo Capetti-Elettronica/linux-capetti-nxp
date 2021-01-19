@@ -29,7 +29,7 @@
 		stdout-path = &uart2;
 	};
 
-	
+
 	gpio_export {
 		compatible = "gpio-export";
 		#size-cells = <0>;
@@ -39,41 +39,41 @@
 			gpio-export,output = <0>;
 			gpios = <&gpio3 24 0>;
 		};
-		
+
 		USB_TYPE_SEL {
 			gpio-export,name = "usb_type_select";
 			gpio-export,output = <1>;
 			gpios = <&gpio4 2 0>;
 		};
-		
+
 		PCIe_CLKEN
 		{
 			gpio-export,name = "pcie_clken";
 			gpio-export,output = <1>;
 			gpios = <&gpio4 0 0>;
 		};
-		
+
 		PCIE_RST_N_0
 		{
 			gpio-export,name = "PCIE_RST_N_0";
 			gpio-export,output = <0>;
 			gpios = <&gpio3 23 0>;
 		};
-		
+
 		BLK_ENABLE
 		{
 			gpio-export,name = "blk_enable";
 			gpio-export,output = <1>;
 			gpios = <&gpio4 26 1>;
 		};
-		
+
 		LCD_VDD_EN
 		{
 			gpio-export,name = "lcd_vdd_en";
 			gpio-export,output = <1>;
 			gpios = <&gpio4 1 1>;
 		};
-		
+
 	};
 
 	wlreg_on: wlreg-on {
@@ -81,7 +81,7 @@
 		regulator-name = "WLREG-ON";
 		regulator-max-microvolt = <3300000>;
 		regulator-min-microvolt = <3300000>;
-		gpios = <&gpio4 3 1>;	
+		gpios = <&gpio4 3 1>;
 		enable-active-high;
 	};
 
@@ -149,7 +149,7 @@
 		dailink_master: simple-audio-card,codec {
 		    sound-dai = <&sgtl5000>;
 		    clocks = <&audiomix_clk IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>;
-		};   
+		};
 	};
 
 #ifdef SGTL_MCLK_ON_PWM4
@@ -189,7 +189,7 @@
 				     80 81 82 83 84 85 86 87 88 89
 				     90 91 92 93 94 95 96 97 98 99
 				    100>;
-				
+
 		default-brightness-level = <100>;
 	};
 
@@ -274,7 +274,7 @@
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy0>;
 	status = "okay";
-	
+
 	snps,reset-gpio = <&gpio4 28 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 
@@ -301,7 +301,7 @@
 
 	snps,reset-gpio = <&gpio4 23 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
-	
+
 	mdio {
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -483,7 +483,7 @@
 			reg = <0x0a>;
 			clocks = <&audiomix_clk IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>;
 			clock-names = "mclk";
-			assigned-clock-rates = <12000000>, <12000000>;                
+			assigned-clock-rates = <12000000>, <12000000>;
 			VDDA-supply = <&reg_3v3_avdd_sgtl>;
 			VDDIO-supply = <&reg_3v3_sgtl>;
 			VDDD-supply = <&reg_1v8_sgtl>;
@@ -628,7 +628,7 @@
 	assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_500M>,
 				 <&clk IMX8MP_SYS_PLL2_50M>;
 	reserved-region = <&rpmsg_reserved>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie_phy{
@@ -676,7 +676,7 @@
 	status = "okay";
 };
 
-&uart2 { /* console */	
+&uart2 { /* console */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
 	status = "okay";
@@ -755,7 +755,7 @@
 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
 	vmmc-supply = <&reg_usdhc2_vmmc>;
-	no-1-8-v;	
+	no-1-8-v;
 	bus-width = <4>;
 	status = "okay";
 };
@@ -1031,13 +1031,13 @@
 			MX8MP_IOMUXC_SD1_DATA7__UART3_DCE_RX		0x140
 		>;
 	};
-	
+
 	pinctrl_uart4: uart4grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_UART4_RXD__UART4_DCE_RX		0x140
 			MX8MP_IOMUXC_UART4_TXD__UART4_DCE_TX		0x140
 		>;
-	};	
+	};
 
 	pinctrl_usdhc1: usdhc1grp {
 		fsl,pins = <
@@ -1059,7 +1059,7 @@
 			MX8MP_IOMUXC_SD1_DATA1__USDHC1_DATA1	0x1d4
 			MX8MP_IOMUXC_SD1_DATA2__USDHC1_DATA2	0x1d4
 			MX8MP_IOMUXC_SD1_DATA3__USDHC1_DATA3	0x1d4
-			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03	0x19		
+			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03	0x19
 		>;
 	};
 
@@ -1071,7 +1071,7 @@
 			MX8MP_IOMUXC_SD1_DATA1__USDHC1_DATA1	0x1d6
 			MX8MP_IOMUXC_SD1_DATA2__USDHC1_DATA2	0x1d6
 			MX8MP_IOMUXC_SD1_DATA3__USDHC1_DATA3	0x1d6
-			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03	0x19			
+			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03	0x19
 		>;
 	};
 
