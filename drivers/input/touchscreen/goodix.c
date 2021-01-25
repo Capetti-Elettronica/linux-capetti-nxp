@@ -914,12 +914,17 @@ static int goodix_ts_probe(struct i2c_client *client,
 	if (error)
 		return error;
 
-	if (ts->gpiod_int && ts->gpiod_rst) {
+	if (/*ts->gpiod_int &&*/ ts->gpiod_rst) {
 		/* reset the controller */
+		printk("MIO RESET\n");
 		error = goodix_reset(ts);
 		if (error) {
 			dev_err(&client->dev, "Controller reset failed.\n");
 			return error;
+		}
+		else
+		{
+			printk("MIO OK\n");
 		}
 	}
 
