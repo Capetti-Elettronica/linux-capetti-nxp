@@ -297,6 +297,10 @@ static int goodix_ts_read_input_report(struct goodix_ts_data *ts, u8 *data)
 		}
 
 		if (data[0] & GOODIX_BUFFER_STATUS_READY) {
+					if (!(data[0] & 0x80))
+		{
+			return -EAGAIN;
+		}
 			touch_num = data[0] & 0x0f;
 			if (touch_num > ts->max_touch_num)
 				return -EPROTO;
@@ -406,7 +410,7 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 
 	if (goodix_i2c_write_u8(ts->client, GOODIX_READ_COOR_ADDR, 0) < 0)
 		dev_err(&ts->client->dev, "I2C write end_cmd error\n");
-
+msleep(2);
 	return IRQ_HANDLED;
 }
 
@@ -820,7 +824,7 @@ static int goodix_configure_dev(struct goodix_ts_data *ts)
 	if (device_property_read_bool(ts->input_dev->dev.parent, "edge-failling-trigger"))
 		ts->int_trigger_type = GOODIX_INT_TRIGGER;
 
-	ts->irq_flags = goodix_irq_flags[ts->int_trigger_type] | IRQF_ONESHOT;
+	ts->irq_flags = goodix_irq_flags[ts->int_trigger_type] | IRQF_ONESHOT | IRQ_TYPE_EDGE_RISING;
 	error = goodix_request_irq(ts);
 	if (error) {
 		dev_err(&ts->client->dev, "request IRQ failed: %d\n", error);
@@ -916,15 +920,11 @@ static int goodix_ts_probe(struct i2c_client *client,
 
 	if (/*ts->gpiod_int &&*/ ts->gpiod_rst) {
 		/* reset the controller */
-		printk("MIO RESET\n");
+		
 		error = goodix_reset(ts);
 		if (error) {
 			dev_err(&client->dev, "Controller reset failed.\n");
 			return error;
-		}
-		else
-		{
-			printk("MIO OK\n");
 		}
 	}
 
