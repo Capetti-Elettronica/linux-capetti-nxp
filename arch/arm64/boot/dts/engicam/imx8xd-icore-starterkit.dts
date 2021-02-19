@@ -646,7 +646,7 @@
 
 	ext_osc = <1>;
 	reserved-region = <&rpmsg_reserved>;
-	status = "okay";
+	status = "disabled";
 };
 
 &rpmsg{
