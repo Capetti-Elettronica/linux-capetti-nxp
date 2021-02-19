@@ -11,7 +11,7 @@
 / {
 
 	model = "Engicam i.Core MX8DXP StarterKit (459B)";
-	compatible = "fsl,imx8dxp";
+	compatible = "fsl,imx8qxp";
 	
 	chosen {
 		stdout-path = &lpuart0;
@@ -53,10 +53,10 @@
 		default-brightness-level = <80>;
 	};
 
-	/*memory@80000000 {
+	memory@80000000 {
 		device_type = "memory";
 		reg = <0x00000000 0x80000000 0 0x40000000>;
-	};*/
+	};
 
 	reserved-memory {
 		#address-cells = <2>;
@@ -840,6 +840,11 @@
 	pinctrl-0 = <&pinctrl_i2c_mipi_csi0>;
 	clock-frequency = <100000>;
 	status = "disabled";
+};
+
+&cpus {
+	/delete-node/ cpu@2;
+	/delete-node/ cpu@3;
 };
 
 &thermal_zones {

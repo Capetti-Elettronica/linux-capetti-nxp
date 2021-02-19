@@ -53,10 +53,11 @@
 		default-brightness-level = <80>;
 	};
 
-	/*memory@80000000 {
+	memory@80000000 {
 		device_type = "memory";
-		reg = <0x00000000 0x80000000 0 0x40000000>;
-	};*/
+		reg = <0x00000000 0x80000000 0 0x80000000>;
+	};
+
 
 	reserved-memory {
 		#address-cells = <2>;

@@ -730,6 +730,11 @@
 	status = "disabled";
 };
 
+&cpus {
+	/delete-node/ cpu@2;
+	/delete-node/ cpu@3;
+};
+
 &thermal_zones {
 	pmic-thermal0 {
 		polling-delay-passive = <250>;
