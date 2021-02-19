@@ -4,8 +4,10 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8mm-icore-ctouch2.dtb \
 			  imx8mm-icore-ctouch2-amp10.dtb \
 			  imx8mm-icore.dtb \
-			  imx8x-icore-starterkit.dtb \
-			  imx8x-smarcore-multimedia-4k.dtb \
+			  imx8xd-icore-starterkit.dtb \
+			  imx8xq-icore-starterkit.dtb \
+			  imx8xd-smarcore-multimedia-4k.dtb \
+			  imx8xq-smarcore-multimedia-4k.dtb \
 			  imx8mp-icore-ctouch2.dtb \
 			  imx8mp-icore-ctouch2-yes10.dtb \
 			  imx8mp-icore-ctouch2-amp10.dtb \
