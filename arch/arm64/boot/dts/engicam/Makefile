@@ -3,6 +3,7 @@
 dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8mm-icore-ctouch2.dtb \
 			  imx8mm-icore-ctouch2-amp10.dtb \
+			  imx8mm-icore-ctouch2-rs232-amp10.dtb \
 			  imx8mm-icore.dtb \
 			  imx8xd-icore-starterkit.dtb \
 			  imx8xq-icore-starterkit.dtb \
@@ -11,5 +12,6 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8mp-icore-ctouch2.dtb \
 			  imx8mp-icore-ctouch2-yes10.dtb \
 			  imx8mp-icore-ctouch2-amp10.dtb \
+			  imx8mp-icore-ctouch2-rs232-amp10.dtb \
  	 		  imx8mp-smarcore.dtb \
  	 		  imx8mp-smarcore-hdmi.dtb
