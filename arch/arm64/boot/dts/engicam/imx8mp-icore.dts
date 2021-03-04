@@ -330,9 +330,9 @@
 	pmic: pca9450@25 {
 		reg = <0x25>;
 		compatible = "nxp,pca9450";
-		/* PMIC PCA9450 PMIC_nINT GPIO1_IO3 */
+		/* PMIC PCA9450 PMIC_nINT GPIO3_IO1 */
 		pinctrl-0 = <&pinctrl_pmic>;
-		gpio_intr = <&gpio1 3 GPIO_ACTIVE_LOW>;
+		gpio_intr = <&gpio3 1 GPIO_ACTIVE_LOW>;
 
 		regulators {
 			#address-cells = <1>;
@@ -974,7 +974,7 @@
 
 	pinctrl_pmic: pmicirq {
 		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03	0x41
+			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01	0x41
 		>;
 	};
 
