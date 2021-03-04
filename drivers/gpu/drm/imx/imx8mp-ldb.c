@@ -112,7 +112,8 @@ imx8mp_ldb_encoder_atomic_mode_set(struct drm_encoder *encoder,
 	struct imx8mp_ldb *imx8mp_ldb = imx8mp_ldb_ch->imx8mp_ldb;
 	struct ldb_channel *ldb_ch = &imx8mp_ldb_ch->base;
 	struct ldb *ldb = &imx8mp_ldb->base;
-	struct drm_display_mode *mode = &crtc_state->adjusted_mode;
+	//struct drm_display_mode *mode = &crtc_state->adjusted_mode;
+	struct drm_display_mode *mode = &crtc_state->mode;
 	unsigned long serial_clk;
 
 	if (mode->clock > 160000) {
