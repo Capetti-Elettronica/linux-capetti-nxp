@@ -263,18 +263,6 @@
 
 };
 
-&cm40_i2c {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	clock-frequency = <100000>;
-	pinctrl-names = "default", "gpio";
-	pinctrl-0 = <&pinctrl_cm40_i2c>;
-	pinctrl-1 = <&pinctrl_cm40_i2c_gpio>;
-	scl-gpios = <&lsio_gpio1 10 GPIO_ACTIVE_HIGH>;
-	sda-gpios = <&lsio_gpio1 9 GPIO_ACTIVE_HIGH>;
-	status = "disabled";
-};
-
 &cm40_intmux {
 	status = "okay";
 };
@@ -354,15 +342,6 @@
 	status = "okay";
 };
 
-&i2c0_mipi_lvds0 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_i2c0_mipi_lvds0>;
-	clock-frequency = <100000>;
-	status = "disabled";
-};
-
 &ldb1_phy {
 	status = "okay";
 };
@@ -391,15 +370,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_mipi_lvds1>;
 	status = "okay";
-};
-
-&i2c0_mipi_lvds1 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_i2c0_mipi_lvds1>;
-	clock-frequency = <100000>;
-	status = "disabled";
 };
 
 &ldb2_phy {
@@ -464,34 +434,6 @@
 	status = "okay";
 };
 
-&amix {
-	status = "disabled";
-};
-
-&asrc0 {
-	fsl,asrc-rate  = <48000>;
-	status = "disabled";
-};
-
-&dsp {
-	compatible = "fsl,imx8qxp-dsp-v1";
-	status = "disabled";
-};
-
-&esai0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_esai0>;
-	assigned-clocks = <&acm IMX_ADMA_ACM_ESAI0_MCLK_SEL>,
-			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>,
-			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_SLV_BUS>,
-			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_MST_BUS>,
-			<&esai0_lpcg 0>;
-	assigned-clock-parents = <&aud_pll_div0_lpcg 0>;
-	assigned-clock-rates = <0>, <786432000>, <49152000>, <12288000>, <49152000>;
-	fsl,txm-rxs;
-	status = "disabled";
-};
-
 &sai0 {
 	#sound-dai-cells = <0>;
 	assigned-clocks = <&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>,
@@ -502,43 +444,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai0>;
 	status = "okay";
-};
-
-&sai1 {
-	assigned-clocks = <&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>,
-			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_SLV_BUS>,
-			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_MST_BUS>,
-			<&sai1_lpcg 0>; /* FIXME: should be sai1, original code is 0 */
-	assigned-clock-rates = <786432000>, <49152000>, <12288000>, <49152000>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_sai1>;
-	status = "disabled";
-};
-
-&sai4 {
-	assigned-clocks = <&acm IMX_ADMA_ACM_SAI4_MCLK_SEL>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_PLL>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_SLV_BUS>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_MST_BUS>,
-			<&sai4_lpcg 0>;
-	assigned-clock-parents = <&aud_pll_div1_lpcg 0>;
-	assigned-clock-rates = <0>, <786432000>, <98304000>, <12288000>, <98304000>;
-	fsl,sai-asynchronous;
-	fsl,txm-rxs;
-	status = "disabled";
-};
-
-&sai5 {
-	assigned-clocks = <&acm IMX_ADMA_ACM_SAI5_MCLK_SEL>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_PLL>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_SLV_BUS>,
-			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_MST_BUS>,
-			<&sai5_lpcg 0>;
-	assigned-clock-parents = <&aud_pll_div1_lpcg 0>;
-	assigned-clock-rates = <0>, <786432000>, <98304000>, <12288000>, <98304000>;
-	fsl,sai-asynchronous;
-	fsl,txm-rxs;
-	status = "disabled";
 };
 
 &fec1 {
@@ -579,7 +484,7 @@
 &i2c1 {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	clock-frequency = <100000>;
+	clock-frequency = <80000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpi2c1>;
 	status = "okay";
@@ -636,18 +541,6 @@
 			};
 		};
 	};
-};
-
-&pcieb{
-	compatible = "fsl,imx8qxp-pcie","snps,dw-pcie";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pcieb>;
-	clkreq-gpio = <&lsio_gpio4 1 GPIO_ACTIVE_LOW>;
-	reset-gpio = <&lsio_gpio4 0 GPIO_ACTIVE_LOW>;
-
-	ext_osc = <1>;
-	reserved-region = <&rpmsg_reserved>;
-	status = "disabled";
 };
 
 &rpmsg{
@@ -761,40 +654,6 @@
 	};
 };
 
-&isi_1 {
-	status = "disabled";
-
-	cap_device {
-		status = "disabled";
-	};
-};
-
-&isi_2 {
-	status = "disabled";
-
-	cap_device {
-		status = "disabled";
-	};
-};
-
-&isi_3 {
-	status = "disabled";
-
-	cap_device {
-		status = "disabled";
-	};
-};
-
-
-&isi_4 {
-	interface = <6 0 2>;
-	status = "disabled";
-
-	cap_device {
-		status = "disabled";
-	};
-};
-
 &irqsteer_csi0 {
 	status = "okay";
 };
@@ -820,27 +679,12 @@
 	status = "okay";
 };
 
-&parallel_csi {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	status = "disabled";
-};
-
 &jpegdec {
 	status = "okay";
 };
 
 &jpegenc {
 	status = "okay";
-};
-
-&i2c_mipi_csi0 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_i2c_mipi_csi0>;
-	clock-frequency = <100000>;
-	status = "disabled";
 };
 
 &thermal_zones {
@@ -890,51 +734,6 @@
 		fsl,pins = <
 			IMX8QXP_QSPI0A_DATA1_LSIO_GPIO3_IO10	0x06000020
 			IMX8QXP_SPI0_CS1_LSIO_GPIO1_IO07 		0x06000020
-		>;
-	};
-
-	pinctrl_cm40_i2c: cm40i2cgrp {
-		fsl,pins = <
-			IMX8QXP_ADC_IN1_M40_I2C0_SDA                            0x0600004c
-			IMX8QXP_ADC_IN0_M40_I2C0_SCL                            0x0600004c
-		>;
-	};
-
-	pinctrl_cm40_i2c_gpio: cm40i2cgrp-gpio {
-		fsl,pins = <
-			IMX8QXP_ADC_IN1_LSIO_GPIO1_IO09		0xc600004c
-			IMX8QXP_ADC_IN0_LSIO_GPIO1_IO10		0xc600004c
-		>;
-	};
-
-	pinctrl_i2c0_mipi_lvds0: mipi_lvds0_i2c0_grp {
-		fsl,pins = <
-			IMX8QXP_MIPI_DSI0_I2C0_SCL_MIPI_DSI0_I2C0_SCL		0xc6000020
-			IMX8QXP_MIPI_DSI0_I2C0_SDA_MIPI_DSI0_I2C0_SDA		0xc6000020
-			IMX8QXP_MIPI_DSI0_GPIO0_01_LSIO_GPIO1_IO28		0x00000020
-		>;
-	};
-
-	pinctrl_i2c0_mipi_lvds1: mipi_lvds1_i2c0_grp {
-		fsl,pins = <
-			IMX8QXP_MIPI_DSI1_I2C0_SCL_MIPI_DSI1_I2C0_SCL		0xc6000020
-			IMX8QXP_MIPI_DSI1_I2C0_SDA_MIPI_DSI1_I2C0_SDA		0xc6000020
-			IMX8QXP_MIPI_DSI1_GPIO0_01_LSIO_GPIO2_IO00		0x00000020
-		>;
-	};
-
-	pinctrl_esai0: esai0grp {
-		fsl,pins = <
-			IMX8QXP_ESAI0_FSR_ADMA_ESAI0_FSR           0xc6000040
-			IMX8QXP_ESAI0_FST_ADMA_ESAI0_FST           0xc6000040
-			IMX8QXP_ESAI0_SCKR_ADMA_ESAI0_SCKR         0xc6000040
-			IMX8QXP_ESAI0_SCKT_ADMA_ESAI0_SCKT         0xc6000040
-			IMX8QXP_ESAI0_TX0_ADMA_ESAI0_TX0           0xc6000040
-			IMX8QXP_ESAI0_TX1_ADMA_ESAI0_TX1           0xc6000040
-			IMX8QXP_ESAI0_TX2_RX3_ADMA_ESAI0_TX2_RX3   0xc6000040
-			IMX8QXP_ESAI0_TX3_RX2_ADMA_ESAI0_TX3_RX2   0xc6000040
-			IMX8QXP_ESAI0_TX4_RX1_ADMA_ESAI0_TX4_RX1   0xc6000040
-			IMX8QXP_ESAI0_TX5_RX0_ADMA_ESAI0_TX5_RX0   0xc6000040
 		>;
 	};
 
@@ -1028,14 +827,6 @@
 		>;
 	};
 
-	pinctrl_pcieb: pcieagrp{
-		fsl,pins = <
-			IMX8QXP_PCIE_CTRL0_PERST_B_LSIO_GPIO4_IO00		0x06000021
-			IMX8QXP_PCIE_CTRL0_CLKREQ_B_LSIO_GPIO4_IO01		0x06000021
-			IMX8QXP_PCIE_CTRL0_WAKE_B_LSIO_GPIO4_IO02		0x04000021
-		>;
-	};
-
 	pinctrl_pwm_mipi_lvds0: mipi_lvds0_pwm_grp {
 		fsl,pins = <
 			IMX8QXP_MIPI_DSI0_GPIO0_00_MIPI_DSI0_PWM0_OUT		0x00000020
@@ -1054,16 +845,6 @@
 			IMX8QXP_SAI0_RXD_ADMA_SAI0_RXD		0x06000040
 			IMX8QXP_SAI0_TXC_ADMA_SAI0_TXC		0x06000040
 			IMX8QXP_SAI0_TXFS_ADMA_SAI0_TXFS	0x06000040
-		>;
-	};
-
-	pinctrl_sai1: sai1grp {
-		fsl,pins = <
-			IMX8QXP_SAI1_RXD_ADMA_SAI1_RXD     0x06000040
-			IMX8QXP_SAI1_RXC_ADMA_SAI1_TXC     0x06000040
-			IMX8QXP_SAI1_RXFS_ADMA_SAI1_TXFS   0x06000040
-			IMX8QXP_SPI0_CS1_ADMA_SAI1_TXD     0x06000060
-			IMX8QXP_SPI2_CS0_LSIO_GPIO1_IO00   0x06000040
 		>;
 	};
 
@@ -1133,13 +914,6 @@
 			IMX8QXP_USDHC1_DATA2_CONN_USDHC1_DATA2			0x00000021
 			IMX8QXP_USDHC1_DATA3_CONN_USDHC1_DATA3			0x00000021
 			IMX8QXP_USDHC1_VSELECT_CONN_USDHC1_VSELECT		0x00000021
-		>;
-	};
-
-	pinctrl_i2c_mipi_csi0: i2c_mipi_csi0 {
-		fsl,pins = <
-			IMX8QXP_MIPI_CSI0_I2C0_SCL_MIPI_CSI0_I2C0_SCL		0xc2000020
-			IMX8QXP_MIPI_CSI0_I2C0_SDA_MIPI_CSI0_I2C0_SDA		0xc2000020
 		>;
 	};
 
