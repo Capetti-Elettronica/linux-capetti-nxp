@@ -5,16 +5,14 @@
 
 /dts-v1/;
 
-#include "imx8xq-icore-starterkit.dts"
+#include "imx8xq-icore-ctouch2.dts"
 
 / {
 
 	model = "Engicam i.Core MX8DXP StarterKit (459B)";
 	compatible = "fsl,imx8qxp", "fsl,imx8dxp";
 	
-	/*/delete-node/ memory@80000000;
-	
-	memory@80000000 {
+	/*memory@80000000 {
 		device_type = "memory";
 		reg = <0x00000000 0x80000000 0 0x40000000>;
 	};*/

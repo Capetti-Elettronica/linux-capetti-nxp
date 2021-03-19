@@ -53,10 +53,10 @@
 		default-brightness-level = <80>;
 	};
 
-	memory@80000000 {
+	/*memory@80000000 {
 		device_type = "memory";
-		reg = <0x00000000 0x80000000 0 0x80000000>;
-	};
+		reg = <0x00000000 0x80000000 0 0x40000000>;
+	};*/
 
 
 	reserved-memory {
@@ -462,6 +462,7 @@
 			compatible = "ethernet-phy-ieee802.3-c22";
 			reg = <7>;
 			status = "okay";
+			max-speed = <100>;
 		};
 
 		ethphy1: ethernet-phy@3 {
@@ -687,7 +688,7 @@
 	status = "okay";
 };
 
-&thermal_zones {
+/*&thermal_zones {
 	pmic-thermal0 {
 		polling-delay-passive = <250>;
 		polling-delay = <2000>;
@@ -715,7 +716,7 @@
 			};
 		};
 	};
-};
+};*/
 
 &iomuxc {
 	pinctrl-names = "default";
