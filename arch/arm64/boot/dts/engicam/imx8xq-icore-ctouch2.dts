@@ -289,7 +289,9 @@
 &lpuart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpuart1>;
-  fsl,uart-has-rtscts;
+	fsl,uart-has-rtscts;
+	rs485-rts-active-low;
+	linux,rs485-enabled-at-boot-time;
 	status = "okay";
 };
 
