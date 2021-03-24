@@ -547,6 +547,15 @@
 	};
 };
 
+&i2c3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <80000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lpi2c3>;
+	status = "okay";
+};
+
 &rpmsg{
 	/*
 	 * 64K for one rpmsg instance:
@@ -786,6 +795,15 @@
 			IMX8QXP_USB_SS3_TC3_ADMA_I2C1_SDA			0x06000021
 		>;
 	};
+	
+	pinctrl_lpi2c3: lpi2c3grp
+	 {
+		fsl,pins = <
+			IMX8QXP_SPI3_CS1_ADMA_I2C3_SCL			0x06000020
+			IMX8QXP_MCLK_IN1_ADMA_I2C3_SDA			0x06000020
+		>;
+	};
+
 
 	pinctrl_flexcan1: flexcan0grp {
 		fsl,pins = <
