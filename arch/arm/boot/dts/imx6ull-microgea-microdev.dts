@@ -152,7 +152,6 @@
 	pinctrl-0 = <&pinctrl_enet1>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy0>;
-	local-mac-address = [00 04 9F 01 1B B9];
 	status = "okay";
 
 	mdio {

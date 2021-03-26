@@ -15,6 +15,16 @@
 
 #include "imx8mm-icore-ctouch2-rs232.dts"
 / {
+  gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+    GPIO_EX {
+      gpio-export,name = "GPIO_EX";
+      gpio-export,output = <0>;
+      gpios = <&gpio4 26 0>;  
+    };
+  };
 };
 
 &i2c2 {
@@ -85,10 +95,15 @@
 	icore-imx8mm {
     edt_ft5x06_pins: edt-ft5x06-pins-grp{
 		  fsl,pins = <
-      MX8MM_IOMUXC_SAI5_MCLK_GPIO3_IO25 0x19
-      MX8MM_IOMUXC_GPIO1_IO04_GPIO1_IO4 0x19
+        MX8MM_IOMUXC_SAI5_MCLK_GPIO3_IO25 0x19
+        MX8MM_IOMUXC_GPIO1_IO04_GPIO1_IO4 0x19
 		  >;
-		};
+    };
+		
+    pinctrl_hog_1: hoggrp-1 {
+      fsl,pins = <
+        MX8MM_IOMUXC_SAI2_TXD0_GPIO4_IO26 0x19
+      >;
+    };
   };
 };
-
