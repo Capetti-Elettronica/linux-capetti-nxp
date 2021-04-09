@@ -1,4 +1,5 @@
 /* Copyright (C) 2008-2012 Freescale Semiconductor, Inc.
+ * Copyright 2020 NXP
  * Authors: Andy Fleming <afleming@freescale.com>
  *	    Timur Tabi <timur@freescale.com>
  *	    Geoff Thorpe <Geoff.Thorpe@freescale.com>
@@ -40,8 +41,14 @@
 /* Private data for Proxy Interface */
 struct dpa_proxy_priv_s {
 	struct mac_device	*mac_dev;
-	struct eventfd_ctx	*efd_ctx;
 };
+
+struct eventfd_list {
+	struct list_head d_list;
+	struct net_device *ndev;
+	struct eventfd_ctx *efd_ctx;
+};
+
 /* Interface Helpers */
 static inline struct device *get_dev_ptr(char *if_name);
 static void phy_link_updates(struct net_device *net_dev);
@@ -71,6 +78,7 @@ static unsigned int current_tlb; /* loops around for fault handling */
 /* Memory reservation is represented as a list of 'mem_fragment's, some of which
  * may be mapped. Unmapped fragments are always merged where possible. */
 static LIST_HEAD(mem_list);
+static LIST_HEAD(eventfd_head);
 
 struct mem_mapping;
 
@@ -1032,7 +1040,8 @@ static long ioctl_dma_map(struct file *fp, struct ctx *ctx,
 				if (i->len != frag->map_len && i->len) {
 					pr_err("ioctl_dma_map() Size requested does not match %s and is none zero\n",
 					frag->name);
-					return -EINVAL;
+					ret = -EINVAL;
+					goto out;
 				}
 
 				/* Check if this has already been mapped
@@ -1122,9 +1131,9 @@ static long ioctl_dma_map(struct file *fp, struct ctx *ctx,
 	i->did_create = 1;
 do_map:
 	/* Verify there is sufficient space to do the mapping */
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	next_addr = usdpaa_get_unmapped_area(fp, next_addr, i->len, 0, 0);
-	up_write(&current->mm->mmap_sem);
+	up_write(&current->mm->mmap_lock);
 
 	if (next_addr & ~PAGE_MASK) {
 		ret = -ENOMEM;
@@ -1172,8 +1181,8 @@ out:
 
 	if (!ret) {
 		unsigned long longret;
-		down_write(&current->mm->mmap_sem);
-		longret = do_mmap_pgoff(fp, next_addr, map->total_size,
+		down_write(&current->mm->mmap_lock);
+		longret = do_mmap(fp, next_addr, map->total_size,
 					PROT_READ |
 					(i->flags &
 					 USDPAA_DMA_FLAG_RDONLY ? 0
@@ -1182,7 +1191,7 @@ out:
 					start_frag->pfn_base,
 					&populate,
 					NULL);
-		up_write(&current->mm->mmap_sem);
+		up_write(&current->mm->mmap_lock);
 		if (longret & ~PAGE_MASK) {
 			ret = (int)longret;
 		} else {
@@ -1204,10 +1213,10 @@ static long ioctl_dma_unmap(struct ctx *ctx, void __user *arg)
 	unsigned long base;
 	unsigned long vaddr;
 
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	vma = find_vma(current->mm, (unsigned long)arg);
 	if (!vma || (vma->vm_start > (unsigned long)arg)) {
-		up_write(&current->mm->mmap_sem);
+		up_write(&current->mm->mmap_lock);
 		return -EFAULT;
 	}
 	spin_lock(&mem_lock);
@@ -1263,7 +1272,7 @@ map_match:
 	do_munmap(current->mm, base, sz, NULL);
 	ret = 0;
  out:
-	up_write(&current->mm->mmap_sem);
+	up_write(&current->mm->mmap_lock);
 	return ret;
 }
 
@@ -1299,10 +1308,10 @@ static long ioctl_dma_lock(struct ctx *ctx, void __user *arg)
 	struct mem_mapping *map;
 	struct vm_area_struct *vma;
 
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 	vma = find_vma(current->mm, (unsigned long)arg);
 	if (!vma || (vma->vm_start > (unsigned long)arg)) {
-		up_read(&current->mm->mmap_sem);
+		up_read(&current->mm->mmap_lock);
 		return -EFAULT;
 	}
 	spin_lock(&mem_lock);
@@ -1313,7 +1322,7 @@ static long ioctl_dma_lock(struct ctx *ctx, void __user *arg)
 	map = NULL;
 map_match:
 	spin_unlock(&mem_lock);
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 
 	if (!map)
 		return -EFAULT;
@@ -1328,7 +1337,7 @@ static long ioctl_dma_unlock(struct ctx *ctx, void __user *arg)
 	struct vm_area_struct *vma;
 	int ret;
 
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 	vma = find_vma(current->mm, (unsigned long)arg);
 	if (!vma || (vma->vm_start > (unsigned long)arg))
 		ret = -EFAULT;
@@ -1351,7 +1360,7 @@ static long ioctl_dma_unlock(struct ctx *ctx, void __user *arg)
 map_match:
 		spin_unlock(&mem_lock);
 	}
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 	return ret;
 }
 
@@ -1360,14 +1369,14 @@ static int portal_mmap(struct file *fp, struct resource *res, void **ptr)
 	unsigned long longret = 0, populate;
 	resource_size_t len;
 
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	len = resource_size(res);
 	if (len != (unsigned long)len)
 		return -EINVAL;
-	longret = do_mmap_pgoff(fp, PAGE_SIZE, (unsigned long)len,
+	longret = do_mmap(fp, PAGE_SIZE, (unsigned long)len,
 				PROT_READ | PROT_WRITE, MAP_SHARED,
 				res->start >> PAGE_SHIFT, &populate, NULL);
-	up_write(&current->mm->mmap_sem);
+	up_write(&current->mm->mmap_lock);
 
 	if (longret & ~PAGE_MASK)
 		return (int)longret;
@@ -1378,9 +1387,9 @@ static int portal_mmap(struct file *fp, struct resource *res, void **ptr)
 
 static void portal_munmap(struct resource *res, void  *ptr)
 {
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	do_munmap(current->mm, (unsigned long)ptr, resource_size(res), NULL);
-	up_write(&current->mm->mmap_sem);
+	up_write(&current->mm->mmap_lock);
 }
 
 static long ioctl_portal_map(struct file *fp, struct ctx *ctx,
@@ -1459,14 +1468,14 @@ static long ioctl_portal_unmap(struct ctx *ctx, struct usdpaa_portal_map *i)
 	u32 channel;
 
 	/* Get the PFN corresponding to one of the virt addresses */
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 	vma = find_vma(current->mm, (unsigned long)i->cinh);
 	if (!vma || (vma->vm_start > (unsigned long)i->cinh)) {
-		up_read(&current->mm->mmap_sem);
+		up_read(&current->mm->mmap_lock);
 		return -EFAULT;
 	}
 	pfn = vma->vm_pgoff;
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 
 	/* Find the corresponding portal */
 	spin_lock(&mem_lock);
@@ -1537,8 +1546,6 @@ static void portal_config_pamu(struct qm_portal_config *pcfg, uint8_t sdest,
 	}
 	stash_attr.cpu = cpu;
 	stash_attr.cache = cache;
-	/* set stash information for the window */
-	stash_attr.window = 0;
 
 	ret = iommu_domain_set_attr(pcfg->iommu_domain,
 				    DOMAIN_ATTR_FSL_PAMU_STASH,
@@ -1696,6 +1703,46 @@ static inline struct device *get_dev_ptr(char *if_name)
 	return dev;
 }
 
+static int ioctl_set_link_status(struct usdpaa_ioctl_update_link_status *args)
+{
+	struct device *dev;
+	struct mac_device *mac_dev;
+
+	dev = get_dev_ptr(args->if_name);
+	if (!dev)
+		return -ENODEV;
+
+	if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet")) {
+		struct net_device *ndev;
+		struct dpa_priv_s *npriv = NULL;
+
+		ndev = dev_get_drvdata(dev);
+		npriv = netdev_priv(ndev);
+		mac_dev =  npriv->mac_dev;
+	} else if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet-init")) {
+		struct proxy_device *proxy_dev;
+
+		proxy_dev = dev_get_drvdata(dev);
+		mac_dev =  proxy_dev->mac_dev;
+	} else {
+		pr_err(KBUILD_MODNAME "Not supported device\n");
+		return -ENOMEM;
+	}
+
+	if (!mac_dev->phy_dev) {
+		pr_err(KBUILD_MODNAME "Device does not have associated phy dev\n");
+		return -EINVAL;
+	}
+
+	if (args->set_link_status == ETH_LINK_UP)
+		phy_resume(mac_dev->phy_dev);
+	else if (args->set_link_status == ETH_LINK_DOWN)
+		phy_suspend(mac_dev->phy_dev);
+	else
+		return -EINVAL;
+	return 0;
+}
+
 /* This function will return Current link status of the device
  * '1' if Link is UP, '0' otherwise.
  *
@@ -1711,14 +1758,22 @@ static inline int ioctl_usdpaa_get_link_status(char *if_name)
 	dev = get_dev_ptr(if_name);
 	if (dev == NULL)
 		return -ENODEV;
-	net_dev = dev->platform_data;
-	if (net_dev == NULL)
-		return -ENODEV;
 
-	if (test_bit(__LINK_STATE_NOCARRIER, &net_dev->state))
-		return 0; /* Link is DOWN */
-	else
-		return 1; /* Link is UP */
+	if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet")) {
+		net_dev = dev_get_drvdata(dev);
+		if (test_bit(__LINK_STATE_START, &net_dev->state))
+			return 1;
+		else
+			return 0;
+	} else {
+		net_dev = dev->platform_data;
+		if (net_dev == NULL)
+			return -ENODEV;
+		if (test_bit(__LINK_STATE_NOCARRIER, &net_dev->state))
+			return 0; /* Link is DOWN */
+		else
+			return 1; /* Link is UP */
+	}
 }
 
 
@@ -1729,20 +1784,65 @@ static inline int ioctl_usdpaa_get_link_status(char *if_name)
  */
 static void phy_link_updates(struct net_device *net_dev)
 {
-	struct dpa_proxy_priv_s *priv = NULL;
+	struct list_head *position = NULL;
+	struct eventfd_list  *ev_mem = NULL;
 
-	pr_debug("%s: Link '%s': Speed '%d-Mbps': Autoneg '%d': Duplex '%d'\n",
-		net_dev->name,
-		ioctl_usdpaa_get_link_status(net_dev->name)?"UP":"DOWN",
-		net_dev->phydev->speed,
-		net_dev->phydev->autoneg,
-		net_dev->phydev->duplex);
+	list_for_each(position, &eventfd_head) {
+		ev_mem = list_entry(position, struct eventfd_list, d_list);
+		if (ev_mem->ndev == net_dev) {
+			eventfd_signal(ev_mem->efd_ctx, 1);
+			pr_debug("%s: Link '%s'\n",
+				net_dev->name,
+				ioctl_usdpaa_get_link_status(net_dev->name)?"UP":"DOWN");
+			return;
+		}
+	}
 
-	/* Wake up the user space context to notify PHY update */
-	priv = netdev_priv(net_dev);
-	eventfd_signal(priv->efd_ctx, 1);
+	pr_err(KBUILD_MODNAME "Device not registered for link events\n");
 }
 
+static int setup_eventfd(struct task_struct *userspace_task,
+			struct usdpaa_ioctl_link_status *args,
+			struct net_device *net_dev)
+{
+	struct file *efd_file = NULL;
+	struct list_head *position = NULL;
+	struct eventfd_list *ev_mem;
+
+	rcu_read_lock();
+	efd_file = fcheck_files(userspace_task->files, args->efd);
+	rcu_read_unlock();
+
+	/* check if device is already registered */
+	list_for_each(position, &eventfd_head) {
+		ev_mem = list_entry(position, struct eventfd_list, d_list);
+		if (ev_mem->ndev == net_dev) {
+			ev_mem->efd_ctx = eventfd_ctx_fileget(efd_file);
+			if (ev_mem->efd_ctx == NULL) {
+				pr_err(KBUILD_MODNAME "get eventfd context failed\n");
+				return -EINVAL;
+			}
+			return 0;
+		}
+	}
+
+	ev_mem = kmalloc(sizeof(*ev_mem), GFP_KERNEL);
+	if (!ev_mem) {
+		return -ENOMEM;
+	}
+	INIT_LIST_HEAD(&ev_mem->d_list);
+
+	ev_mem->ndev = net_dev;
+	ev_mem->efd_ctx = eventfd_ctx_fileget(efd_file);
+	if (ev_mem->efd_ctx == NULL) {
+	pr_err(KBUILD_MODNAME "get eventfd context failed\n");
+		kfree(ev_mem);
+		return -EINVAL;
+	}
+	list_add(&ev_mem->d_list, &eventfd_head);
+
+	return 0;
+}
 
 /* IOCTL handler for enabling Link status request for a given interface
  * Input parameters:
@@ -1758,91 +1858,109 @@ static int ioctl_en_if_link_status(struct usdpaa_ioctl_link_status *args)
 	struct dpa_proxy_priv_s *priv = NULL;
 	struct device *dev;
 	struct mac_device *mac_dev;
-	struct proxy_device *proxy_dev;
 	struct task_struct *userspace_task = NULL;
-	struct file *efd_file = NULL;
+	int ret = 0;
 
 	dev = get_dev_ptr(args->if_name);
 	if (dev == NULL)
 		return -ENODEV;
-	/* Utilize dev->platform_data to save netdevice
-	   pointer as it will not be registered */
-	if (dev->platform_data) {
-		pr_debug("%s: IF %s already initialized\n",
-			__func__, args->if_name);
-		/* This will happen when application is not able to initiate
-		 * cleanup in last run. We still need to save the new
-		 * eventfd context.
-		 */
-		net_dev = dev->platform_data;
-		priv = netdev_priv(net_dev);
 
+	if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet")) {
+		struct dpa_priv_s *npriv = NULL;
+		struct phy_device *phy;
+
+		net_dev = dev_get_drvdata(dev);
+		npriv = netdev_priv(net_dev);
+		mac_dev =  npriv->mac_dev;
+		phy = of_phy_find_device(mac_dev->phy_node);
+		phy->adjust_link = phy_link_updates;
 		/* Get current task context from which IOCTL was called */
 		userspace_task = current;
 
-		rcu_read_lock();
-		efd_file = fcheck_files(userspace_task->files, args->efd);
-		rcu_read_unlock();
+		ret = setup_eventfd(userspace_task, args, net_dev);
+		if (ret)
+			return ret;
 
-		priv->efd_ctx = eventfd_ctx_fileget(efd_file);
-		if (!priv->efd_ctx) {
-			pr_err(KBUILD_MODNAME "get eventfd context failed\n");
-			/* Free the allocated memory for net device */
-			dev->platform_data = NULL;
-			free_netdev(net_dev);
-			return -EINVAL;
-		}
 		/* Since there will be NO PHY update as link is already setup,
 		 * wake user context once so that current PHY status can
 		 * be fetched.
 		 */
 		phy_link_updates(net_dev);
-		return 0;
-	}
 
-	proxy_dev = dev_get_drvdata(dev);
-	mac_dev =  proxy_dev->mac_dev;
-	/* Allocate an dummy net device for proxy interface */
-	net_dev = alloc_etherdev(sizeof(*priv));
-	if (!net_dev) {
-		pr_err(KBUILD_MODNAME "alloc_etherdev failed\n");
-		return -ENOMEM;
-	} else {
+	} else if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet-init")) {
+		struct proxy_device *proxy_dev;
+
+		/* Utilize dev->platform_data to save netdevice
+		 * pointer as it will not be registered.
+		 */
+		if (dev->platform_data) {
+			pr_debug("%s: IF %s already initialized\n",
+				 __func__, args->if_name);
+			/* This will happen when application is not able to initiate
+			 * cleanup in last run. We still need to save the new
+			 * eventfd context.
+			 */
+			net_dev = dev->platform_data;
+			priv = netdev_priv(net_dev);
+
+			/* Get current task context from which IOCTL was called */
+			userspace_task = current;
+
+			ret = setup_eventfd(userspace_task, args, net_dev);
+			if (ret) {
+				dev->platform_data = NULL;
+				free_netdev(net_dev);
+				return ret;
+			}
+			/* Since there will be NO PHY update as link is already setup,
+			 * wake user context once so that current PHY status can
+			 * be fetched.
+			 */
+			phy_link_updates(net_dev);
+			return 0;
+		}
+
+		proxy_dev = dev_get_drvdata(dev);
+		mac_dev =  proxy_dev->mac_dev;
+
+		/* Allocate an dummy net device for proxy interface */
+		net_dev = alloc_etherdev(sizeof(*priv));
+		if (!net_dev) {
+			pr_err(KBUILD_MODNAME "alloc_etherdev failed\n");
+			return -ENOMEM;
+		}
 		SET_NETDEV_DEV(net_dev, dev);
 		priv = netdev_priv(net_dev);
 		priv->mac_dev = mac_dev;
 		/* Get current task context from which IOCTL was called */
 		userspace_task = current;
 
-		rcu_read_lock();
-		efd_file = fcheck_files(userspace_task->files, args->efd);
-		rcu_read_unlock();
-
-		priv->efd_ctx = eventfd_ctx_fileget(efd_file);
-
-		if (!priv->efd_ctx) {
-			pr_err(KBUILD_MODNAME "get eventfd context failed\n");
-			/* Free the allocated memory for net device */
+		ret = setup_eventfd(userspace_task, args, net_dev);
+		if (ret) {
 			free_netdev(net_dev);
-			return -EINVAL;
+			return ret;
 		}
 		strncpy(net_dev->name, args->if_name, IF_NAME_MAX_LEN);
 		dev->platform_data = net_dev;
-	}
 
-	pr_debug("%s: mac_dev %p cell_index %d\n",
-		__func__, mac_dev, mac_dev->cell_index);
-	mac_dev->phy_dev = of_phy_connect(net_dev, mac_dev->phy_node,
-	                         phy_link_updates, 0, mac_dev->phy_if);
-	if (unlikely(mac_dev->phy_dev == NULL) || IS_ERR(mac_dev->phy_dev)) {
-		pr_err("%s: --------Error in PHY Connect\n", __func__);
-		/* Free the allocated memory for net device */
-		free_netdev(net_dev);
-		return -ENODEV;
+		pr_debug("%s: mac_dev %p cell_index %d\n",
+			 __func__, mac_dev, mac_dev->cell_index);
+		mac_dev->phy_dev = of_phy_connect(net_dev, mac_dev->phy_node,
+						  phy_link_updates, 0,
+						  mac_dev->phy_if);
+		if (unlikely(mac_dev->phy_dev == NULL) || IS_ERR(mac_dev->phy_dev)) {
+			pr_err("%s: --------Error in PHY Connect\n", __func__);
+			/* Free the allocated memory for net device */
+			free_netdev(net_dev);
+			return -ENODEV;
+		}
+		pr_debug("%s: --- PHY connected for %s\n", __func__, args->if_name);
+		net_dev->phydev = mac_dev->phy_dev;
+		mac_dev->start(mac_dev);
+	} else {
+		pr_err(KBUILD_MODNAME "Not supported device\n");
+		return -ENOMEM;
 	}
-	net_dev->phydev = mac_dev->phy_dev;
-	mac_dev->start(mac_dev);
-	pr_debug("%s: --- PHY connected for %s\n", __func__, args->if_name);
 
 	return 0;
 }
@@ -1859,11 +1977,28 @@ static int ioctl_disable_if_link_status(char *if_name)
 	struct device *dev;
 	struct mac_device *mac_dev;
 	struct proxy_device *proxy_dev;
-	struct dpa_proxy_priv_s *priv = NULL;
+	struct list_head *position = NULL;
+	struct eventfd_list  *ev_mem = NULL;
 
 	dev = get_dev_ptr(if_name);
 	if (dev == NULL)
 		return -ENODEV;
+
+	if (of_device_is_compatible(dev->of_node, "fsl,dpa-ethernet")) {
+		net_dev = dev_get_drvdata(dev);
+		list_for_each(position, &eventfd_head) {
+			ev_mem = list_entry(position, struct eventfd_list, d_list);
+			if (ev_mem->ndev == net_dev) {
+				eventfd_ctx_put(ev_mem->efd_ctx);
+				list_del(position);
+				kfree(ev_mem);
+				break;
+			}
+		}
+
+		return 0;
+	}
+
 	/* Utilize dev->platform_data to save netdevice
 	   pointer as it will not be registered */
 	if (!dev->platform_data) {
@@ -1877,9 +2012,16 @@ static int ioctl_disable_if_link_status(char *if_name)
 	mac_dev =  proxy_dev->mac_dev;
 	mac_dev->stop(mac_dev);
 
-	priv = netdev_priv(net_dev);
-	eventfd_ctx_put(priv->efd_ctx);
-
+	/* free the memory for eventfd */
+	list_for_each(position, &eventfd_head) {
+		ev_mem = list_entry(position, struct eventfd_list, d_list);
+		if (ev_mem->ndev == net_dev) {
+			eventfd_ctx_put(ev_mem->efd_ctx);
+			list_del(&ev_mem->d_list);
+			kfree(ev_mem);
+			break;
+		}
+	}
 	/* This will also deregister the call back */
 	phy_disconnect(mac_dev->phy_dev);
 	phy_resume(mac_dev->phy_dev);
@@ -1998,6 +2140,20 @@ static long usdpaa_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 
 		return 0;
 	}
+	case USDPAA_IOCTL_UPDATE_LINK_STATUS:
+	{
+		struct usdpaa_ioctl_update_link_status input;
+		int ret;
+
+		if (copy_from_user(&input, a, sizeof(input)))
+			return -EFAULT;
+
+		ret = ioctl_set_link_status(&input);
+		if (ret)
+			pr_err("Error(%d) updating link status:IF: %s\n",
+			       ret, input.if_name);
+		return ret;
+	}
 	}
 	return -EINVAL;
 }
@@ -2015,7 +2171,7 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 	{
 		int ret;
 		struct usdpaa_ioctl_dma_map_compat input;
-		struct usdpaa_ioctl_dma_map converted;
+		struct usdpaa_ioctl_dma_map converted = {0};
 
 		if (copy_from_user(&input, a, sizeof(input)))
 			return -EFAULT;
@@ -2024,7 +2180,8 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 		converted.phys_addr = input.phys_addr;
 		converted.len = input.len;
 		converted.flags = input.flags;
-		strncpy(converted.name, input.name, USDPAA_DMA_NAME_MAX);
+		memset(converted.name, '\0', USDPAA_DMA_NAME_MAX);
+		strncpy(converted.name, input.name, USDPAA_DMA_NAME_MAX - 1);
 		converted.has_locking = input.has_locking;
 		converted.did_create = input.did_create;
 
@@ -2033,7 +2190,8 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 		input.phys_addr = converted.phys_addr;
 		input.len = converted.len;
 		input.flags = converted.flags;
-		strncpy(input.name, converted.name, USDPAA_DMA_NAME_MAX);
+		memset(input.name, '\0', USDPAA_DMA_NAME_MAX);
+		strncpy(input.name, converted.name, USDPAA_DMA_NAME_MAX - 1);
 		input.has_locking = converted.has_locking;
 		input.did_create = converted.did_create;
 		if (copy_to_user(a, &input, sizeof(input)))
@@ -2044,7 +2202,7 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 	{
 		int ret;
 		struct compat_usdpaa_ioctl_portal_map input;
-		struct usdpaa_ioctl_portal_map converted;
+		struct usdpaa_ioctl_portal_map converted = {0};
 		if (copy_from_user(&input, a, sizeof(input)))
 			return -EFAULT;
 		converted.type = input.type;
@@ -2062,7 +2220,7 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 	case USDPAA_IOCTL_PORTAL_UNMAP_COMPAT:
 	{
 		struct usdpaa_portal_map_compat input;
-		struct usdpaa_portal_map converted;
+		struct usdpaa_portal_map converted = {0};
 
 		if (copy_from_user(&input, a, sizeof(input)))
 			return -EFAULT;
@@ -2073,7 +2231,7 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 	case USDPAA_IOCTL_ALLOC_RAW_PORTAL_COMPAT:
 	{
 		int ret;
-		struct usdpaa_ioctl_raw_portal converted;
+		struct usdpaa_ioctl_raw_portal converted = {0};
 		struct compat_ioctl_raw_portal input;
 		if (copy_from_user(&input, a, sizeof(input)))
 			return -EFAULT;
@@ -2096,7 +2254,7 @@ static long usdpaa_ioctl_compat(struct file *fp, unsigned int cmd,
 	}
 	case USDPAA_IOCTL_FREE_RAW_PORTAL_COMPAT:
 	{
-		struct usdpaa_ioctl_raw_portal converted;
+		struct usdpaa_ioctl_raw_portal converted = {0};
 		struct compat_ioctl_raw_portal input;
 		if (copy_from_user(&input, a, sizeof(input)))
 			return -EFAULT;

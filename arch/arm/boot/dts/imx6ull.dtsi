@@ -81,7 +81,7 @@
 			fsl,max_ddr_freq = <400000000>;
 		};
 
-		aips3: aips-bus@2200000 {
+		aips3: bus@2200000 {
 			compatible = "fsl,aips-bus", "simple-bus";
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -99,7 +99,7 @@
 			};
 
 			rngb: rng@2284000 {
-				compatible = "fsl,imx25-rngb";
+				compatible = "fsl,imx6ull-rngb", "fsl,imx25-rngb";
 				reg = <0x02284000 0x4000>;
 				interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&clks IMX6UL_CLK_DUMMY>;

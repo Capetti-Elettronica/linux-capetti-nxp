@@ -20,12 +20,12 @@
 		hp-det-gpio = <&lsio_gpio1 0 0>;
 		mic-det-gpio = <&lsio_gpio1 0 0>;
 		simple-audio-card,widgets =
-			"Headphone", "Headphone Jack",
+			"Headphone", "Headphones",
 			"Speaker", "Ext Spk",
 			"Microphone", "Mic Jack";
-		simple-audio-card,audio-routing =
-			"Headphone Jack", "HP_L",
-			"Headphone Jack", "HP_R",
+		simple-audio-card,routing =
+			"Headphones", "HP_L",
+			"Headphones", "HP_R",
 			"Ext Spk", "SPK_LP",
 			"Ext Spk", "SPK_LN",
 			"Ext Spk", "SPK_RP",
@@ -34,6 +34,7 @@
 			"LINPUT3", "Mic Jack",
 			"RINPUT1", "Mic Jack",
 			"RINPUT2", "Mic Jack",
+			"Mic Jack", "MICB",
 			"Playback", "SAI1.OUT",
 			"SAI1.IN", "Capture";
 		simple-audio-card,dai-link {
@@ -89,21 +90,23 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai1>;
 
-	power-domains = <&pd IMX_SC_R_SAI_1>,
-		<&pd IMX_SC_R_DMA_2_CH14>,
-		<&pd IMX_SC_R_DMA_2_CH15>,
-		<&pd IMX_SC_R_AUDIO_CLK_0>,
-		<&pd IMX_SC_R_AUDIO_CLK_1>,
-		<&pd IMX_SC_R_AUDIO_PLL_0>,
-		<&pd IMX_SC_R_AUDIO_PLL_1>,
-		<&pd IMX_SC_R_MU_13A>,
-		<&pd IMX_SC_R_MU_13B>,
-		<&pd IMX_SC_R_DSP>,
-		<&pd IMX_SC_R_DSP_RAM>,
-		<&pd IMX_SC_R_IRQSTR_DSP>;
+	power-domains = <&pd IMX_SC_R_MU_13A>,
+			<&pd IMX_SC_R_MU_13B>,
+			<&pd IMX_SC_R_DSP>,
+			<&pd IMX_SC_R_DSP_RAM>,
+			<&pd IMX_SC_R_IRQSTR_DSP>,
+			<&pd IMX_SC_R_SAI_1>,
+			<&pd IMX_SC_R_DMA_2_CH14>,
+			<&pd IMX_SC_R_DMA_2_CH15>,
+			<&pd IMX_SC_R_AUDIO_CLK_0>,
+			<&pd IMX_SC_R_AUDIO_CLK_1>,
+			<&pd IMX_SC_R_AUDIO_PLL_0>,
+			<&pd IMX_SC_R_AUDIO_PLL_1>;
 
-	clock-names = "sai1_bus", "sai1_mclk0", "sai1_mclk1", "sai1_mclk2", "sai1_mclk3";
-	clocks = <&sai1_lpcg 1>, <&clk_dummy>, <&sai1_lpcg 0>,
+	clock-names = "ipg", "ocram", "core",
+		"sai1_bus", "sai1_mclk0", "sai1_mclk1", "sai1_mclk2", "sai1_mclk3";
+	clocks = <&clk_dummy>, <&clk_dummy>, <&clk_dummy>,
+		<&sai1_lpcg 1>, <&clk_dummy>, <&sai1_lpcg 0>,
 		<&clk_dummy>, <&clk_dummy>;
 	assigned-clocks = <&acm IMX_ADMA_ACM_SAI1_MCLK_SEL>,
 			<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>,
@@ -121,6 +124,7 @@
 
 	tplg-name = "sof-imx8qxp-wm8960.tplg";
 	machine-drv-name = "asoc-simple-card";
+
 	status = "okay";
 };
 

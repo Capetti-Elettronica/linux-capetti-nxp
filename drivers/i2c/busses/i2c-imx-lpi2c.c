@@ -76,12 +76,6 @@
 #define I2C_CLK_RATIO	24 / 59
 #define CHUNK_DATA	256
 
-#define STARDARD_MAX_BITRATE	100000
-#define FAST_MAX_BITRATE	400000
-#define FAST_PLUS_MAX_BITRATE	1000000
-#define HIGHSPEED_MAX_BITRATE	3400000
-#define ULTRA_FAST_MAX_BITRATE	5000000
-
 #define I2C_PM_TIMEOUT		1000 /* ms */
 
 enum lpi2c_imx_mode {
@@ -162,13 +156,13 @@ static void lpi2c_imx_set_mode(struct lpi2c_imx_struct *lpi2c_imx)
 	unsigned int bitrate = lpi2c_imx->bitrate;
 	enum lpi2c_imx_mode mode;
 
-	if (bitrate <= STARDARD_MAX_BITRATE)
+	if (bitrate <= I2C_MAX_STANDARD_MODE_FREQ)
 		mode = STANDARD;
-	else if (bitrate <= FAST_MAX_BITRATE)
+	else if (bitrate <= I2C_MAX_FAST_MODE_FREQ)
 		mode = FAST;
-	else if (bitrate <= FAST_PLUS_MAX_BITRATE)
+	else if (bitrate <= I2C_MAX_FAST_MODE_PLUS_FREQ)
 		mode = FAST_PLUS;
-	else if (bitrate <= HIGHSPEED_MAX_BITRATE)
+	else if (bitrate <= I2C_MAX_HIGH_SPEED_MODE_FREQ)
 		mode = HS;
 	else
 		mode = ULTRA_FAST;
@@ -644,10 +638,8 @@ static int lpi2c_imx_probe(struct platform_device *pdev)
 		return PTR_ERR(lpi2c_imx->base);
 
 	lpi2c_imx->irq = platform_get_irq(pdev, 0);
-	if (lpi2c_imx->irq < 0) {
-		dev_err(&pdev->dev, "can't get irq number\n");
+	if (lpi2c_imx->irq < 0)
 		return lpi2c_imx->irq;
-	}
 
 	lpi2c_imx->adapter.owner	= THIS_MODULE;
 	lpi2c_imx->adapter.algo		= &lpi2c_imx_algo;
@@ -671,7 +663,7 @@ static int lpi2c_imx_probe(struct platform_device *pdev)
 	ret = of_property_read_u32(pdev->dev.of_node,
 				   "clock-frequency", &lpi2c_imx->bitrate);
 	if (ret)
-		lpi2c_imx->bitrate = STARDARD_MAX_BITRATE;
+		lpi2c_imx->bitrate = I2C_MAX_STANDARD_MODE_FREQ;
 
 	i2c_set_adapdata(&lpi2c_imx->adapter, lpi2c_imx);
 	platform_set_drvdata(pdev, lpi2c_imx);

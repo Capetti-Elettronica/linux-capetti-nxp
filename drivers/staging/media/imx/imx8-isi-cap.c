@@ -31,6 +31,8 @@
 #include "imx8-common.h"
 
 #define sd_to_cap_dev(ptr)	container_of(ptr, struct mxc_isi_cap_dev, sd)
+static int mxc_isi_cap_streamoff(struct file *file, void *priv,
+				 enum v4l2_buf_type type);
 
 struct mxc_isi_fmt mxc_isi_out_formats[] = {
 	{
@@ -678,6 +680,10 @@ static bool is_entity_link_setup(struct mxc_isi_cap_dev *isi_cap)
 	if (!csi_sd || !csi_sd->entity.num_links)
 		return false;
 
+	/* No sensor subdev for hdmi rx */
+	if (strstr(csi_sd->name, "hdmi"))
+		return true;
+
 	sen_sd = mxc_get_remote_subdev(csi_sd, __func__);
 	if (!sen_sd || !sen_sd->entity.num_links)
 		return false;
@@ -739,13 +745,18 @@ static int mxc_isi_capture_open(struct file *file)
 static int mxc_isi_capture_release(struct file *file)
 {
 	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
+	struct video_device *vdev = video_devdata(file);
 	struct mxc_isi_dev *mxc_isi = mxc_isi_get_hostdata(isi_cap->pdev);
 	struct device *dev = &isi_cap->pdev->dev;
+	struct vb2_queue *q = vdev->queue;
 	struct v4l2_subdev *sd;
 	int ret = -1;
 
 	if (!isi_cap->is_link_setup)
 		return 0;
+
+	if (isi_cap->is_streaming[isi_cap->id])
+		mxc_isi_cap_streamoff(file, NULL, q->type);
 
 	sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
 	if (!sd)
@@ -814,8 +825,6 @@ static int mxc_isi_cap_enum_fmt(struct file *file, void *priv,
 		return -EINVAL;
 
 	fmt = &mxc_isi_out_formats[f->index];
-	if (!fmt)
-		return -EINVAL;
 
 	strncpy(f->description, fmt->name, sizeof(f->description) - 1);
 
@@ -1078,6 +1087,7 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
 	if (ret < 0 && ret != -ENOIOCTLCMD)
 		return ret;
 
+	isi_cap->is_streaming[isi_cap->id] = 1;
 	mxc_isi->is_streaming = 1;
 
 	return 0;
@@ -1096,6 +1106,7 @@ static int mxc_isi_cap_streamoff(struct file *file, void *priv,
 	mxc_isi_channel_disable(mxc_isi);
 	ret = vb2_ioctl_streamoff(file, priv, type);
 
+	isi_cap->is_streaming[isi_cap->id] = 0;
 	mxc_isi->is_streaming = 0;
 
 	return ret;
@@ -1105,20 +1116,17 @@ static int mxc_isi_cap_g_selection(struct file *file, void *fh,
 				   struct v4l2_selection *s)
 {
 	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
-	struct mxc_isi_frame *f = &isi_cap->src_f;
+	struct mxc_isi_frame *f = &isi_cap->dst_f;
 
 	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
 
-	if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+	if (s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT &&
+	    s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
 		return -EINVAL;
 
 	switch (s->target) {
 	case V4L2_SEL_TGT_COMPOSE_DEFAULT:
 	case V4L2_SEL_TGT_COMPOSE_BOUNDS:
-		f = &isi_cap->dst_f;
-		/* fall through */
-	case V4L2_SEL_TGT_CROP_BOUNDS:
-	case V4L2_SEL_TGT_CROP_DEFAULT:
 		s->r.left = 0;
 		s->r.top = 0;
 		s->r.width = f->o_width;
@@ -1126,13 +1134,10 @@ static int mxc_isi_cap_g_selection(struct file *file, void *fh,
 		return 0;
 
 	case V4L2_SEL_TGT_COMPOSE:
-		f = &isi_cap->dst_f;
-		/* fall through */
-	case V4L2_SEL_TGT_CROP:
 		s->r.left = f->h_off;
 		s->r.top = f->v_off;
-		s->r.width = f->width;
-		s->r.height = f->height;
+		s->r.width = f->c_width;
+		s->r.height = f->c_height;
 		return 0;
 	}
 
@@ -1162,15 +1167,16 @@ static int mxc_isi_cap_s_selection(struct file *file, void *fh,
 	unsigned long flags;
 
 	dev_dbg(&isi_cap->pdev->dev, "%s\n", __func__);
-	if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+	if (s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT &&
+	    s->type != V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
 		return -EINVAL;
 
 	if (s->target == V4L2_SEL_TGT_COMPOSE)
 		f = &isi_cap->dst_f;
-	else if (s->target == V4L2_SEL_TGT_CROP)
-		f = &isi_cap->src_f;
 	else
 		return -EINVAL;
+
+	bounds_adjust(f, &rect);
 
 	if (s->flags & V4L2_SEL_FLAG_LE &&
 	    !enclosed_rectangle(&rect, &s->r))
@@ -1178,6 +1184,11 @@ static int mxc_isi_cap_s_selection(struct file *file, void *fh,
 
 	if (s->flags & V4L2_SEL_FLAG_GE &&
 	    !enclosed_rectangle(&s->r, &rect))
+		return -ERANGE;
+
+	if ((s->flags & V4L2_SEL_FLAG_LE) &&
+	    (s->flags & V4L2_SEL_FLAG_GE) &&
+	    (rect.width != s->r.width || rect.height != s->r.height))
 		return -ERANGE;
 
 	s->r = rect;
@@ -1628,7 +1639,7 @@ static int mxc_isi_register_cap_device(struct mxc_isi_cap_dev *isi_cap,
 	if (ret)
 		goto err_me_cleanup;
 
-	ret = video_register_device(vdev, VFL_TYPE_GRABBER, -1);
+	ret = video_register_device(vdev, VFL_TYPE_VIDEO, -1);
 	if (ret)
 		goto err_ctrl_free;
 

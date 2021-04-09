@@ -12,6 +12,7 @@
 #include <drm/bridge/fsl_imx_ldb.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_probe_helper.h>
+#include <drm/drm_simple_kms_helper.h>
 
 #include "imx-drm.h"
 
@@ -112,8 +113,7 @@ imx8mp_ldb_encoder_atomic_mode_set(struct drm_encoder *encoder,
 	struct imx8mp_ldb *imx8mp_ldb = imx8mp_ldb_ch->imx8mp_ldb;
 	struct ldb_channel *ldb_ch = &imx8mp_ldb_ch->base;
 	struct ldb *ldb = &imx8mp_ldb->base;
-	//struct drm_display_mode *mode = &crtc_state->adjusted_mode;
-	struct drm_display_mode *mode = &crtc_state->mode;
+	struct drm_display_mode *mode = &crtc_state->adjusted_mode;
 	unsigned long serial_clk;
 
 	if (mode->clock > 160000) {
@@ -246,10 +246,6 @@ imx8mp_ldb_connector_helper_funcs = {
 	.best_encoder = imx8mp_ldb_connector_best_encoder,
 };
 
-static const struct drm_encoder_funcs imx8mp_ldb_encoder_funcs = {
-	.destroy = imx_drm_encoder_destroy,
-};
-
 static const struct drm_encoder_helper_funcs imx8mp_ldb_encoder_helper_funcs = {
 	.atomic_mode_set = imx8mp_ldb_encoder_atomic_mode_set,
 	.enable = imx8mp_ldb_encoder_enable,
@@ -296,8 +292,7 @@ imx8mp_ldb_bind(struct device *dev, struct device *master, void *data)
 
 		drm_encoder_helper_add(encoder[i],
 				      &imx8mp_ldb_encoder_helper_funcs);
-		drm_encoder_init(drm, encoder[i], &imx8mp_ldb_encoder_funcs,
-				 DRM_MODE_ENCODER_LVDS, NULL);
+		drm_simple_encoder_init(drm, encoder[i], DRM_MODE_ENCODER_LVDS);
 	}
 
 	pm_runtime_enable(dev);

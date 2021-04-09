@@ -961,7 +961,8 @@ static void mx6s_stop_streaming(struct vb2_queue *vq)
 	list_for_each_entry_safe(buf, tmp,
 				&csi_dev->active_bufs, internal.queue) {
 		list_del_init(&buf->internal.queue);
-		if (buf->vb.vb2_buf.state == VB2_BUF_STATE_ACTIVE)
+		if (buf->internal.discard == false &&
+		    buf->vb.vb2_buf.state == VB2_BUF_STATE_ACTIVE)
 			vb2_buffer_done(&buf->vb.vb2_buf, VB2_BUF_STATE_ERROR);
 	}
 
@@ -1532,6 +1533,7 @@ static int mx6s_vidioc_streamoff(struct file *file, void *priv,
 {
 	struct mx6s_csi_dev *csi_dev = video_drvdata(file);
 	struct v4l2_subdev *sd = csi_dev->sd;
+	int ret;
 
 	WARN_ON(priv != file->private_data);
 
@@ -1542,11 +1544,11 @@ static int mx6s_vidioc_streamoff(struct file *file, void *priv,
 	 * This calls buf_release from host driver's videobuf_queue_ops for all
 	 * remaining buffers. When the last buffer is freed, stop capture
 	 */
-	vb2_streamoff(&csi_dev->vb2_vidq, i);
+	ret = vb2_streamoff(&csi_dev->vb2_vidq, i);
+	if (!ret)
+		v4l2_subdev_call(sd, video, s_stream, 0);
 
-	v4l2_subdev_call(sd, video, s_stream, 0);
-
-	return 0;
+	return ret;
 }
 
 static int mx6s_vidioc_g_pixelaspect(struct file *file, void *fh,
@@ -1929,7 +1931,7 @@ static int mx6s_csi_probe(struct platform_device *pdev)
 	video_set_drvdata(csi_dev->vdev, csi_dev);
 	mutex_lock(&csi_dev->lock);
 
-	ret = video_register_device(csi_dev->vdev, VFL_TYPE_GRABBER, -1);
+	ret = video_register_device(csi_dev->vdev, VFL_TYPE_VIDEO, -1);
 	if (ret < 0) {
 		video_device_release(csi_dev->vdev);
 		mutex_unlock(&csi_dev->lock);

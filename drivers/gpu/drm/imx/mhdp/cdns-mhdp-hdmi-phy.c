@@ -1,7 +1,7 @@
 /*
  * Cadence High-Definition Multimedia Interface (HDMI) driver
  *
- * Copyright (C) 2019 NXP Semiconductor, Inc.
+ * Copyright (C) 2019-2021 NXP Semiconductor, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include <drm/bridge/cdns-mhdp.h>
 #include "cdns-mhdp-phy.h"
+#include "cdns-mhdp-imx.h"
 
 /* HDMI TX clock control settings */
 struct hdmi_ctrl {
@@ -94,11 +95,11 @@ static const struct hdmi_ctrl imx8qm_ctrl_table[] = {
 { 85000, 170000, 1000,  850000, 1700000, 0x11, 0x00, 0x07, 340, 0x146, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 2, 0x01,  85000, 170000},
 {170000, 340000, 1000, 1700000, 3400000, 0x22, 0x01, 0x07, 340, 0x146, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 1, 0x00, 170000, 340000},
 {340000, 600000, 1000, 3400000, 6000000, 0x3C, 0x03, 0x06, 600, 0x24A, 0x00A, 0, 0, 0, 3400000, 6000000, 1, 1, 1, 2, 1, 0x00, 340000, 600000},
-{ 25000,  34000, 1205,  312500,  425000, 0x04, 0x01, 0x01, 400, 0x182, 0x00A, 0, 0, 0, 2500000, 3400000, 0, 2, 2, 2, 4, 0x03,  31250,  42500},
-{ 34000,  68000, 1205,  425000,  850000, 0x06, 0x02, 0x01, 300, 0x11E, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 4, 0x02,  42500,  85000},
-{ 68000, 136000, 1205,  850000, 1700000, 0x0D, 0x02, 0x02, 325, 0x137, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 2, 0x01,  85000, 170000},
-{136000, 272000, 1205, 1700000, 3400000, 0x1A, 0x02, 0x04, 325, 0x137, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 1, 0x00, 170000, 340000},
-{272000, 480000, 1205, 3400000, 6000000, 0x30, 0x03, 0x05, 600, 0x24A, 0x00A, 0, 0, 0, 3400000, 6000000, 1, 1, 1, 2, 1, 0x00, 340000, 600000},
+{ 25000,  34000, 1250,  312500,  425000, 0x04, 0x01, 0x01, 400, 0x182, 0x00A, 0, 0, 0, 2500000, 3400000, 0, 2, 2, 2, 4, 0x03,  31250,  42500},
+{ 34000,  68000, 1250,  425000,  850000, 0x06, 0x02, 0x01, 300, 0x11E, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 4, 0x02,  42500,  85000},
+{ 68000, 136000, 1250,  850000, 1700000, 0x0D, 0x02, 0x02, 325, 0x137, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 2, 0x01,  85000, 170000},
+{136000, 272000, 1250, 1700000, 3400000, 0x1A, 0x02, 0x04, 325, 0x137, 0x00A, 0, 0, 0, 1700000, 3400000, 0, 1, 1, 2, 1, 0x00, 170000, 340000},
+{272000, 480000, 1250, 3400000, 6000000, 0x30, 0x03, 0x05, 600, 0x24A, 0x00A, 0, 0, 0, 3400000, 6000000, 1, 1, 1, 2, 1, 0x00, 340000, 600000},
 { 25000,  28000, 1500,  375000,  420000, 0x03, 0x01, 0x01, 360, 0x15A, 0x00A, 0, 0, 0, 3000000, 3360000, 0, 2, 2, 2, 4, 0x03,  37500,  42000},
 { 28000,  56000, 1500,  420000,  840000, 0x06, 0x02, 0x01, 360, 0x15A, 0x00A, 0, 0, 0, 1680000, 3360000, 0, 1, 1, 2, 4, 0x02,  42000,  84000},
 { 56000, 113000, 1500,  840000, 1695000, 0x0B, 0x00, 0x05, 330, 0x13C, 0x00A, 0, 0, 0, 1680000, 3390000, 0, 1, 1, 2, 2, 0x01,  84000, 169500},
@@ -746,6 +747,7 @@ int cdns_hdmi_phy_set_imx8qm(struct cdns_mhdp_device *mhdp)
 		DRM_ERROR("NO HDMI FW running\n");
 		return -ENXIO;
 	}
+	imx8qm_phy_reset(0);
 
 	/* Configure PHY */
 	mhdp->hdmi.char_rate = hdmi_phy_cfg_ss28fdsoi(mhdp, mode);
@@ -753,6 +755,7 @@ int cdns_hdmi_phy_set_imx8qm(struct cdns_mhdp_device *mhdp)
 		DRM_ERROR("failed to set phy pclock\n");
 		return -EINVAL;
 	}
+	imx8qm_phy_reset(1);
 
 	ret = hdmi_phy_power_up(mhdp);
 	if (ret < 0)
@@ -761,4 +764,27 @@ int cdns_hdmi_phy_set_imx8qm(struct cdns_mhdp_device *mhdp)
 	hdmi_phy_set_vswing(mhdp);
 
 	return true;
+}
+
+int cdns_hdmi_phy_shutdown(struct cdns_mhdp_device *mhdp)
+{
+	int timeout;
+	u32 reg_val;
+
+	reg_val = cdns_phy_reg_read(mhdp, PHY_HDP_MODE_CTRL);
+	reg_val &= 0xfff0;
+	/* PHY_DP_MODE_CTL set to A3 power state*/
+	cdns_phy_reg_write(mhdp, PHY_HDP_MODE_CTRL, reg_val | 0x8);
+
+	/* PHY_DP_MODE_CTL */
+	timeout = 0;
+	do {
+		reg_val = cdns_phy_reg_read(mhdp, PHY_HDP_MODE_CTRL);
+		DRM_INFO("Reg val is 0x%04x\n", reg_val);
+		timeout++;
+		msleep(100);
+	} while (!(reg_val & (0x8 << 4)) && (timeout < 10));	/* Wait for A3 acknowledge */
+
+	DRM_INFO("hdmi phy shutdown complete\n");
+	return 0;
 }

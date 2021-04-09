@@ -84,7 +84,7 @@ Additional required properties for imx8mq-pcie:
 	- "pcie_aux"
 
 Additional required properties for imx8 pcie:
-- hsio-cfg: hsio configration mode when the pcie node is supported.
+- hsio-cfg: hsio configuration mode when the pcie node is supported.
   mode 1: pciea 2 lanes and one sata ahci port.
   mode 2: pciea 1 lane, pcieb 1 lane and one sata ahci port.
   mode 3: pciea 2 lanes, pcieb 1 lane.

@@ -423,7 +423,7 @@ static ssize_t seco_mu_fops_write(struct file *fp, const char __user *buf,
 	 * carried in the message.
 	 */
 	nb_words = MESSAGE_SIZE(header);
-	if (nb_words * sizeof(u32) > size) {
+	if (nb_words * sizeof(u32) != size) {
 		devctx_err(dev_ctx, "User buffer too small\n");
 		goto exit;
 	}

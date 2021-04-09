@@ -6,6 +6,7 @@
  */
 
 #include <linux/device.h>
+#include <linux/slab.h>
 
 #include "dcss-dev.h"
 
@@ -290,7 +291,7 @@ static int dcss_scaler_ch_init_all(struct dcss_scaler *scl,
 
 		ch->base_ofs = scaler_base + i * 0x400;
 
-		ch->base_reg = devm_ioremap(scl->dev, ch->base_ofs, SZ_4K);
+		ch->base_reg = ioremap(ch->base_ofs, SZ_4K);
 		if (!ch->base_reg) {
 			dev_err(scl->dev, "scaler: unable to remap ch base\n");
 			return -ENOMEM;
@@ -307,7 +308,7 @@ int dcss_scaler_init(struct dcss_dev *dcss, unsigned long scaler_base)
 {
 	struct dcss_scaler *scaler;
 
-	scaler = devm_kzalloc(dcss->dev, sizeof(*scaler), GFP_KERNEL);
+	scaler = kzalloc(sizeof(*scaler), GFP_KERNEL);
 	if (!scaler)
 		return -ENOMEM;
 
@@ -324,11 +325,10 @@ int dcss_scaler_init(struct dcss_dev *dcss, unsigned long scaler_base)
 
 		for (i = 0; i < 3; i++) {
 			if (scaler->ch[i].base_reg)
-				devm_iounmap(scaler->dev,
-					     scaler->ch[i].base_reg);
+				iounmap(scaler->ch[i].base_reg);
 		}
 
-		devm_kfree(scaler->dev, scaler);
+		kfree(scaler);
 
 		return -ENOMEM;
 	}
@@ -346,10 +346,10 @@ void dcss_scaler_exit(struct dcss_scaler *scl)
 		dcss_writel(0, ch->base_reg + DCSS_SCALER_CTRL);
 
 		if (ch->base_reg)
-			devm_iounmap(scl->dev, ch->base_reg);
+			iounmap(ch->base_reg);
 	}
 
-	devm_kfree(scl->dev, scl);
+	kfree(scl);
 }
 
 void dcss_scaler_ch_enable(struct dcss_scaler *scl, int ch_num, bool en)
@@ -896,6 +896,8 @@ void dcss_scaler_setup(struct dcss_scaler *scl, int ch_num,
 void dcss_scaler_write_sclctrl(struct dcss_scaler *scl)
 {
 	int chnum;
+
+	dcss_ctxld_assert_locked(scl->ctxld);
 
 	for (chnum = 0; chnum < 3; chnum++) {
 		struct dcss_scaler_ch *ch = &scl->ch[chnum];

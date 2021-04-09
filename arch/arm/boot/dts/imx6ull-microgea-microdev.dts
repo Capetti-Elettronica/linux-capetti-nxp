@@ -49,6 +49,13 @@
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 		};
+		
+		reg_sd1_vmmc: regulator@1 {
+			compatible = "regulator-fixed";
+			regulator-name = "SD1_MMC";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+		};
 
 		wlreg_on: fixedregulator@100 {
 			compatible = "regulator-fixed";
@@ -190,7 +197,6 @@
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO03__OSC32K_32K_OUT  	0x1b090
-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19  	0x17059 /*CD sdhc1 */
 				MX6UL_PAD_SNVS_TAMPER0__GPIO5_IO00   	0x1b0b0 /* WL_REF_ON */
 				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01   	0x1b0b0 /* BT_REF_ON */
 				MX6UL_PAD_NAND_CE1_B__GPIO4_IO14   	0x1b0b0 /* ETH_ALIM_EN */
@@ -301,34 +307,14 @@
 
 		pinctrl_usdhc1: usdhc1grp {
 			fsl,pins = <
-				MX6UL_PAD_SD1_CMD__USDHC1_CMD     0x17059
 				MX6UL_PAD_SD1_CLK__USDHC1_CLK     0x10059
+				MX6UL_PAD_SD1_CMD__USDHC1_CMD     0x17059
 				MX6UL_PAD_SD1_DATA0__USDHC1_DATA0 0x17059
 				MX6UL_PAD_SD1_DATA1__USDHC1_DATA1 0x17059
 				MX6UL_PAD_SD1_DATA2__USDHC1_DATA2 0x17059
 				MX6UL_PAD_SD1_DATA3__USDHC1_DATA3 0x17059
-			>;
-		};
+				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19 0x17059 
 
-		pinctrl_usdhc1_100mhz: usdhc1grp100mhz {
-			fsl,pins = <
-				MX6UL_PAD_SD1_CMD__USDHC1_CMD     0x170b9
-				MX6UL_PAD_SD1_CLK__USDHC1_CLK     0x100b9
-				MX6UL_PAD_SD1_DATA0__USDHC1_DATA0 0x170b9
-				MX6UL_PAD_SD1_DATA1__USDHC1_DATA1 0x170b9
-				MX6UL_PAD_SD1_DATA2__USDHC1_DATA2 0x170b9
-				MX6UL_PAD_SD1_DATA3__USDHC1_DATA3 0x170b9
-			>;
-		};
-
-		pinctrl_usdhc1_200mhz: usdhc1grp200mhz {
-			fsl,pins = <
-				MX6UL_PAD_SD1_CMD__USDHC1_CMD     0x170f9
-				MX6UL_PAD_SD1_CLK__USDHC1_CLK     0x100f9
-				MX6UL_PAD_SD1_DATA0__USDHC1_DATA0 0x170f9
-				MX6UL_PAD_SD1_DATA1__USDHC1_DATA1 0x170f9
-				MX6UL_PAD_SD1_DATA2__USDHC1_DATA2 0x170f9
-				MX6UL_PAD_SD1_DATA3__USDHC1_DATA3 0x170f9
 			>;
 		};
 
@@ -430,10 +416,10 @@
 &usdhc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>;
-	max-frequency = <25000000>;
-	bus-width = <4>;
-	cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
-	vmmc-supply = <&reg_out_3v3>;
+	no-1-8-v;
+	//cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
+	broken-cd;
+	vmmc-supply = <&reg_sd1_vmmc>;
 	enable-sdio-wakeup;
 	keep-power-in-suspend;
 	status = "okay";
@@ -446,7 +432,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2>;
 	bus-width = <4>;
-	mo-1-8-v;
+	no-1-8-v;
 	pm-ignore-notify;
 	keep-power-in-suspend;
 	vmmc-supply = <&wlreg_on>;

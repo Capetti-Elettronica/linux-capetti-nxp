@@ -148,7 +148,7 @@
 			compatible = "shared-dma-pool";
 			reusable;
 			size = <0 0x3c000000>;
-			alloc-ranges = <0 0x96000000 0 0x3c000000>;
+			alloc-ranges = <0 0xc0000000 0 0x3c000000>;
 			linux,cma-default;
 		};
 
@@ -351,7 +351,7 @@
 		model = "imx-cs42888";
 		esai-controller = <&esai0>;
 		audio-codec = <&cs42888>;
-		asrc-controller = <&asrc0>;
+		audio-asrc = <&asrc0>;
 		status = "okay";
 		xen,passthrough;
 	};
@@ -842,9 +842,11 @@
 	status = "okay";
 };
 
+/*
 &usb3phynop1 {
 	status = "okay";
 };
+*/
 
 &usbotg3 {
 	dr_mode = "otg";
@@ -938,10 +940,12 @@
 	status = "okay";
 };
 
+/*
 &mu3_m0{
 	interrupts = <GIC_SPI 475 IRQ_TYPE_LEVEL_HIGH>;
 	status = "okay";
 };
+*/
 
 &vpu_decoder {
 	compatible = "nxp,imx8qm-b0-vpudec";
@@ -952,12 +956,14 @@
 	status = "okay";
 };
 
+/*
 &vpu_ts {
 	compatible = "nxp,imx8qm-b0-vpu-ts";
 	boot-region = <&ts_boot>;
 	reg-csr = <0x2d0b0000>;
 	status = "okay";
 };
+*/
 
 &vpu_encoder {
 	compatible = "nxp,imx8qm-b0-vpuenc";
@@ -1063,6 +1069,10 @@
 	status = "disabled";
 };
 
+&usbotg3_cdns3 {
+	/delete-property/ iommus;
+	status = "disabled";
+};
 &sai7 {
 	assigned-clocks = <&acm IMX_ADMA_ACM_SAI7_MCLK_SEL>,
 			<&clk IMX_SC_R_AUDIO_PLL_1 IMX_SC_PM_CLK_PLL>,
@@ -1139,6 +1149,7 @@
 	disable-gpio = <&lsio_gpio4 9 GPIO_ACTIVE_LOW>;
 	ext_osc = <1>;
 	epdev_on-supply = <&epdev_on>;
+	reserved-region = <&rpmsg_reserved>;
 	status = "okay";
 };
 

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright 2014-2016 Freescale Semiconductor Inc.
- * Copyright 2017-2018 NXP
+ * Copyright 2017-2020 NXP
  *
  */
 
@@ -10,12 +10,14 @@
 
 /* DPSW Version */
 #define DPSW_VER_MAJOR		8
-#define DPSW_VER_MINOR		1
+#define DPSW_VER_MINOR		5
 
 #define DPSW_CMD_BASE_VERSION	1
+#define DPSW_CMD_VERSION_2	2
 #define DPSW_CMD_ID_OFFSET	4
 
 #define DPSW_CMD_ID(id)	(((id) << DPSW_CMD_ID_OFFSET) | DPSW_CMD_BASE_VERSION)
+#define DPSW_CMD_V2(id) (((id) << DPSW_CMD_ID_OFFSET) | DPSW_CMD_VERSION_2)
 
 /* Command IDs */
 #define DPSW_CMDID_CLOSE                    DPSW_CMD_ID(0x800)
@@ -38,7 +40,7 @@
 #define DPSW_CMDID_IF_SET_TCI               DPSW_CMD_ID(0x030)
 #define DPSW_CMDID_IF_SET_STP               DPSW_CMD_ID(0x031)
 
-#define DPSW_CMDID_IF_GET_COUNTER           DPSW_CMD_ID(0x034)
+#define DPSW_CMDID_IF_GET_COUNTER           DPSW_CMD_V2(0x034)
 
 #define DPSW_CMDID_IF_ENABLE                DPSW_CMD_ID(0x03D)
 #define DPSW_CMDID_IF_DISABLE               DPSW_CMD_ID(0x03E)
@@ -68,6 +70,10 @@
 #define DPSW_CMDID_FDB_REMOVE_MULTICAST     DPSW_CMD_ID(0x087)
 #define DPSW_CMDID_FDB_SET_LEARNING_MODE    DPSW_CMD_ID(0x088)
 #define DPSW_CMDID_FDB_DUMP                 DPSW_CMD_ID(0x08A)
+
+#define DPSW_CMDID_IF_GET_PORT_MAC_ADDR     DPSW_CMD_ID(0x0A7)
+#define DPSW_CMDID_IF_GET_PRIMARY_MAC_ADDR  DPSW_CMD_ID(0x0A8)
+#define DPSW_CMDID_IF_SET_PRIMARY_MAC_ADDR  DPSW_CMD_ID(0x0A9)
 
 /* Macros for accessing command fields smaller than 1byte */
 #define DPSW_MASK(field)        \
@@ -367,6 +373,16 @@ struct dpsw_rsp_fdb_dump {
 struct dpsw_rsp_get_api_version {
 	__le16 version_major;
 	__le16 version_minor;
+};
+
+struct dpsw_rsp_if_get_mac_addr {
+	__le16 pad;
+	u8 mac_addr[6];
+};
+
+struct dpsw_cmd_if_set_mac_addr {
+	__le16 if_id;
+	u8 mac_addr[6];
 };
 
 #endif /* __FSL_DPSW_CMD_H */

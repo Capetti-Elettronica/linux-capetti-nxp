@@ -97,7 +97,7 @@
 			compatible = "shared-dma-pool";
 			reusable;
 			size = <0 0x3c000000>;
-			alloc-ranges = <0 0x96000000 0 0x3c000000>;
+			alloc-ranges = <0 0xc0000000 0 0x3c000000>;
 			linux,cma-default;
 		};
 	};
@@ -331,14 +331,6 @@
 			fsl,pins = <
 				IMX8QM_M41_GPIO0_00_DMA_UART3_RX		0x06000020
 				IMX8QM_M41_GPIO0_01_DMA_UART3_TX		0x06000020
-			>;
-		};
-
-		pinctrl_mlb: mlbgrp {
-			fsl,pins = <
-				IMX8QM_MLB_SIG_CONN_MLB_SIG               0x21
-				IMX8QM_MLB_CLK_CONN_MLB_CLK               0x21
-				IMX8QM_MLB_DATA_CONN_MLB_DATA             0x21
 			>;
 		};
 

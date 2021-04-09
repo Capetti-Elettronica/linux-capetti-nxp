@@ -146,7 +146,7 @@
 };
 
 &cpu0 {
-	arm-supply = <&sw1a_reg>;
+	cpu-supply = <&sw1a_reg>;
 };
 
 &epdc {
@@ -919,6 +919,14 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_sim1_1>;
 	pinctrl-1 = <&pinctrl_sim1_1>;
+	status = "okay";
+};
+
+&snvs_poweroff {
+	status = "okay";
+};
+
+&snvs_pwrkey {
 	status = "okay";
 };
 

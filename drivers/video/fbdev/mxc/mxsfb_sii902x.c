@@ -216,6 +216,7 @@ static void sii902x_cable_connected(void)
 	int i;
 	const struct fb_videomode *mode;
 	struct fb_videomode m;
+	int ret;
 
 	if (sii902x_read_edid(sii902x.fbi) < 0)
 		dev_err(&sii902x.client->dev,
@@ -267,9 +268,9 @@ static void sii902x_cable_connected(void)
 
 			sii902x.fbi->var.activate |= FB_ACTIVATE_FORCE;
 			console_lock();
-			if (!fb_set_var(sii902x.fbi, &sii902x.fbi->var))
+			ret = fb_set_var(sii902x.fbi, &sii902x.fbi->var);
+			if (!ret)
 				fbcon_update_vcs(sii902x.fbi, sii902x.fbi->var.activate & FB_ACTIVATE_ALL);
-
 			console_unlock();
 		}
 		/* Power on sii902x */

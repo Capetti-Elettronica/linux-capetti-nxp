@@ -7,6 +7,7 @@
 #include <linux/firmware/imx/ipc.h>
 #include <linux/interrupt.h>
 #include <linux/io.h>
+#include <linux/iopoll.h>
 #include <linux/kernel.h>
 #include <linux/mailbox_controller.h>
 #include <linux/module.h>
@@ -30,6 +31,8 @@
 #define IMX_MU_xCR_GIRn(x)	BIT(16 + (3 - (x)))
 
 #define IMX_MU_CHANS		16
+/* TX0/RX0/RXDB[0-3] */
+#define IMX_MU_SCU_CHANS	6
 #define IMX_MU_CHAN_NAME_SIZE	20
 
 #define IMX_MU_SECO_TX_TOUT (msecs_to_jiffies(3000))
@@ -68,15 +71,13 @@ struct imx_mu_priv {
 	struct clk		*clk;
 	int			irq;
 
-	/* for control register save and restore */
 	u32 xcr;
 
 	bool			side_b;
 };
 
 struct imx_mu_dcfg {
-	int (*tx)(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp,
-		  void *data);
+	int (*tx)(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp, void *data);
 	int (*rx)(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp);
 	int (*rxdb)(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp);
 	void (*init)(struct imx_mu_priv *priv);
@@ -101,7 +102,7 @@ static u32 imx_mu_read(struct imx_mu_priv *priv, u32 offs)
 	return ioread32(priv->base + offs);
 }
 
-static int imx_mu_tx_waiting_write(struct imx_mu_priv *priv, u32 idx, u32 val)
+static int imx_mu_tx_waiting_write(struct imx_mu_priv *priv, u32 val, u32 idx)
 {
 	u64 timeout_time = get_jiffies_64() + IMX_MU_SECO_TX_TOUT;
 	u32 status;
@@ -125,7 +126,7 @@ static int imx_mu_tx_waiting_write(struct imx_mu_priv *priv, u32 idx, u32 val)
 	return 0;
 }
 
-static int imx_mu_rx_waiting_read(struct imx_mu_priv *priv, u32 idx, u32 *val)
+static int imx_mu_rx_waiting_read(struct imx_mu_priv *priv, u32 *val, u32 idx)
 {
 	u64 timeout_time = get_jiffies_64() + IMX_MU_SECO_RX_TOUT;
 	u32 status;
@@ -181,9 +182,7 @@ static int imx_mu_generic_tx(struct imx_mu_priv *priv,
 		tasklet_schedule(&cp->txdb_tasklet);
 		break;
 	default:
-		dev_warn_ratelimited(priv->dev,
-				     "Send data on wrong channel type: %d\n",
-				     cp->type);
+		dev_warn_ratelimited(priv->dev, "Send data on wrong channel type: %d\n", cp->type);
 		return -EINVAL;
 	}
 
@@ -210,6 +209,88 @@ static int imx_mu_generic_rxdb(struct imx_mu_priv *priv,
 	return 0;
 }
 
+static int imx_mu_scu_tx(struct imx_mu_priv *priv,
+			 struct imx_mu_con_priv *cp,
+			 void *data)
+{
+	struct imx_sc_rpc_msg_max *msg = data;
+	u32 *arg = data;
+	int i, ret;
+	u32 xsr;
+
+	switch (cp->type) {
+	case IMX_MU_TYPE_TX:
+		/*
+		 * msg->hdr.size specifies the number of u32 words while
+		 * sizeof yields bytes.
+		 */
+
+		if (msg->hdr.size > sizeof(*msg) / 4) {
+			/*
+			 * The real message size can be different to
+			 * struct imx_sc_rpc_msg_max size
+			 */
+			dev_err(priv->dev, "Maximal message size (%zu bytes) exceeded on TX; got: %i bytes\n", sizeof(*msg), msg->hdr.size << 2);
+			return -EINVAL;
+		}
+
+		for (i = 0; i < 4 && i < msg->hdr.size; i++)
+			imx_mu_write(priv, *arg++, priv->dcfg->xTR[i % 4]);
+		for (; i < msg->hdr.size; i++) {
+			ret = readl_poll_timeout(priv->base + priv->dcfg->xSR,
+						 xsr,
+						 xsr & IMX_MU_xSR_TEn(i % 4),
+						 0, 5 * USEC_PER_SEC);
+			if (ret) {
+				dev_err(priv->dev, "Send data index: %d timeout\n", i);
+				return ret;
+			}
+			imx_mu_write(priv, *arg++, priv->dcfg->xTR[i % 4]);
+		}
+
+		imx_mu_xcr_rmw(priv, IMX_MU_xCR_TIEn(cp->idx), 0);
+		break;
+	default:
+		dev_warn_ratelimited(priv->dev, "Send data on wrong channel type: %d\n", cp->type);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
+static int imx_mu_scu_rx(struct imx_mu_priv *priv,
+			 struct imx_mu_con_priv *cp)
+{
+	struct imx_sc_rpc_msg_max msg;
+	u32 *data = (u32 *)&msg;
+	int i, ret;
+	u32 xsr;
+
+	imx_mu_xcr_rmw(priv, 0, IMX_MU_xCR_RIEn(0));
+	*data++ = imx_mu_read(priv, priv->dcfg->xRR[0]);
+
+	if (msg.hdr.size > sizeof(msg) / 4) {
+		dev_err(priv->dev, "Maximal message size (%zu bytes) exceeded on RX; got: %i bytes\n", sizeof(msg), msg.hdr.size << 2);
+		return -EINVAL;
+	}
+
+	for (i = 1; i < msg.hdr.size; i++) {
+		ret = readl_poll_timeout(priv->base + priv->dcfg->xSR, xsr,
+					 xsr & IMX_MU_xSR_RFn(i % 4), 0, 5 * USEC_PER_SEC);
+		if (ret) {
+			dev_err(priv->dev, "Send data index: %d timeout, size = %d, svc = %d, func = %d\n",
+				i, msg.hdr.size, msg.hdr.svc, msg.hdr.func);
+			return ret;
+		}
+		*data++ = imx_mu_read(priv, priv->dcfg->xRR[i % 4]);
+	}
+
+	imx_mu_xcr_rmw(priv, IMX_MU_xCR_RIEn(0), 0);
+	mbox_chan_received_data(cp->chan, (void *)&msg);
+
+	return 0;
+}
+
 static int imx_mu_seco_tx(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp,
 			  void *data)
 {
@@ -229,7 +310,9 @@ static int imx_mu_seco_tx(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp,
 			 * The real message size can be different to
 			 * struct imx_sc_rpc_msg_max size
 			 */
-			dev_err(priv->dev, "Maximal message size (%zu bytes) exceeded on TX; got: %i bytes\n", sizeof(*msg), byte_size);
+			dev_err(priv->dev,
+				"Exceed max msg size (%zu) on TX, got: %i\n",
+				sizeof(*msg), byte_size);
 			return -EINVAL;
 		}
 
@@ -253,7 +336,7 @@ static int imx_mu_seco_tx(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp,
 		/* Send rest of message waiting for remote read */
 		for (; i < msg->hdr.size; i++) {
 			dev_dbg(priv->dev, "Sending word %d\n", i);
-			err = imx_mu_tx_waiting_write(priv, i, *arg++);
+			err = imx_mu_tx_waiting_write(priv, *arg++, i);
 			if (err) {
 				dev_err(priv->dev, "Timeout tx %d\n", i);
 				return err;
@@ -289,7 +372,8 @@ static int imx_mu_seco_rxdb(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp
 	*data++ = imx_mu_read(priv, priv->dcfg->xRR[0]);
 	byte_size = msg.hdr.size * sizeof(u32);
 	if (byte_size > sizeof(msg)) {
-		dev_err(priv->dev, "Maximal message size (%zu bytes) exceeded on RX; got: %i bytes\n", sizeof(msg), byte_size);
+		dev_err(priv->dev, "Exceed max msg size (%zu) on RX, got: %i\n",
+			sizeof(msg), byte_size);
 		err = -EINVAL;
 		goto error;
 	}
@@ -297,7 +381,7 @@ static int imx_mu_seco_rxdb(struct imx_mu_priv *priv, struct imx_mu_con_priv *cp
 	/* Read message waiting they are written */
 	for (i = 1; i < msg.hdr.size; i++) {
 		dev_dbg(priv->dev, "Receiving word %d\n", i);
-		err = imx_mu_rx_waiting_read(priv, i, data++);
+		err = imx_mu_rx_waiting_read(priv, data++, i);
 		if (err) {
 			dev_err(priv->dev, "Timeout rx %d\n", i);
 			goto error;
@@ -339,8 +423,6 @@ static irqreturn_t imx_mu_isr(int irq, void *p)
 
 	ctrl = imx_mu_read(priv, priv->dcfg->xCR);
 	val = imx_mu_read(priv, priv->dcfg->xSR);
-
-	dev_dbg(priv->dev, "isr: status: %.8x ctrl: %.8x\n", val, ctrl);
 
 	switch (cp->type) {
 	case IMX_MU_TYPE_TX:
@@ -461,14 +543,49 @@ static const struct mbox_chan_ops imx_mu_ops = {
 	.shutdown = imx_mu_shutdown,
 };
 
+static struct mbox_chan *imx_mu_scu_xlate(struct mbox_controller *mbox,
+					  const struct of_phandle_args *sp)
+{
+	u32 type, idx, chan;
+
+	if (sp->args_count != 2) {
+		dev_err(mbox->dev, "Invalid argument count %d\n", sp->args_count);
+		return ERR_PTR(-EINVAL);
+	}
+
+	type = sp->args[0]; /* channel type */
+	idx = sp->args[1]; /* index */
+
+	switch (type) {
+	case IMX_MU_TYPE_TX:
+	case IMX_MU_TYPE_RX:
+		if (idx != 0)
+			dev_err(mbox->dev, "Invalid chan idx: %d\n", idx);
+		chan = type;
+		break;
+	case IMX_MU_TYPE_RXDB:
+		chan = 2 + idx;
+		break;
+	default:
+		dev_err(mbox->dev, "Invalid chan type: %d\n", type);
+		return ERR_PTR(-EINVAL);
+	}
+
+	if (chan >= mbox->num_chans) {
+		dev_err(mbox->dev, "Not supported channel number: %d. (type: %d, idx: %d)\n", chan, type, idx);
+		return ERR_PTR(-EINVAL);
+	}
+
+	return &mbox->chans[chan];
+}
+
 static struct mbox_chan * imx_mu_xlate(struct mbox_controller *mbox,
 				       const struct of_phandle_args *sp)
 {
 	u32 type, idx, chan;
 
 	if (sp->args_count != 2) {
-		dev_err(mbox->dev, "Invalid argument count %d\n",
-			sp->args_count);
+		dev_err(mbox->dev, "Invalid argument count %d\n", sp->args_count);
 		return ERR_PTR(-EINVAL);
 	}
 
@@ -477,17 +594,15 @@ static struct mbox_chan * imx_mu_xlate(struct mbox_controller *mbox,
 	chan = type * 4 + idx;
 
 	if (chan >= mbox->num_chans) {
-		dev_err(mbox->dev,
-			"Not supported chan number: %d. (type: %d, idx: %d)\n",
-			chan, type, idx);
+		dev_err(mbox->dev, "Not supported channel number: %d. (type: %d, idx: %d)\n", chan, type, idx);
 		return ERR_PTR(-EINVAL);
 	}
 
 	return &mbox->chans[chan];
 }
 
-static struct mbox_chan * imx_mu_seco_xlate(struct mbox_controller *mbox,
-					    const struct of_phandle_args *sp)
+static struct mbox_chan *imx_mu_seco_xlate(struct mbox_controller *mbox,
+					   const struct of_phandle_args *sp)
 {
 	u32 type;
 
@@ -533,7 +648,29 @@ static void imx_mu_init_generic(struct imx_mu_priv *priv)
 	imx_mu_write(priv, 0, priv->dcfg->xCR);
 }
 
-static void imx_mu_seco_init(struct imx_mu_priv *priv)
+static void imx_mu_init_scu(struct imx_mu_priv *priv)
+{
+	unsigned int i;
+
+	for (i = 0; i < IMX_MU_SCU_CHANS; i++) {
+		struct imx_mu_con_priv *cp = &priv->con_priv[i];
+
+		cp->idx = i < 2 ? 0 : i - 2;
+		cp->type = i < 2 ? i : IMX_MU_TYPE_RXDB;
+		cp->chan = &priv->mbox_chans[i];
+		priv->mbox_chans[i].con_priv = cp;
+		snprintf(cp->irq_desc, sizeof(cp->irq_desc),
+			 "imx_mu_chan[%i-%i]", cp->type, cp->idx);
+	}
+
+	priv->mbox.num_chans = IMX_MU_SCU_CHANS;
+	priv->mbox.of_xlate = imx_mu_scu_xlate;
+
+	/* Set default MU configuration */
+	imx_mu_write(priv, 0, priv->dcfg->xCR);
+}
+
+static void imx_mu_init_seco(struct imx_mu_priv *priv)
 {
 	imx_mu_init_generic(priv);
 	priv->mbox.of_xlate = imx_mu_seco_xlate;
@@ -594,8 +731,10 @@ static int imx_mu_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, priv);
 
 	ret = devm_mbox_controller_register(dev, &priv->mbox);
-	if (ret)
+	if (ret) {
+		clk_disable_unprepare(priv->clk);
 		return ret;
+	}
 
 	pm_runtime_enable(dev);
 
@@ -615,6 +754,7 @@ static int imx_mu_probe(struct platform_device *pdev)
 
 disable_runtime_pm:
 	pm_runtime_disable(dev);
+	clk_disable_unprepare(priv->clk);
 	return ret;
 }
 
@@ -626,62 +766,6 @@ static int imx_mu_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
-static int imx_mu_suspend_noirq(struct device *dev)
-{
-	struct imx_mu_priv *priv = dev_get_drvdata(dev);
-
-	if (!priv->clk)
-		priv->xcr = imx_mu_read(priv, priv->dcfg->xCR);
-
-        return 0;
-}
-
-static int imx_mu_resume_noirq(struct device *dev)
-{
-	struct imx_mu_priv *priv = dev_get_drvdata(dev);
-
-	/*
-	 * ONLY restore MU when context lost, the TIE could
-	 * be set during noirq resume as there is MU data
-	 * communication going on, and restore the saved
-	 * value will overwrite the TIE and cause MU data
-	 * send failed, may lead to system freeze. This issue
-	 * is observed by testing freeze mode suspend.
-	 */
-	if (!imx_mu_read(priv, priv->dcfg->xCR) && !priv->clk)
-		imx_mu_write(priv, priv->xcr, priv->dcfg->xCR);
-
-	return 0;
-}
-
-static int imx_mu_runtime_suspend(struct device *dev)
-{
-	struct imx_mu_priv *priv = dev_get_drvdata(dev);
-
-	clk_disable_unprepare(priv->clk);
-
-	return 0;
-}
-
-static int imx_mu_runtime_resume(struct device *dev)
-{
-	struct imx_mu_priv *priv = dev_get_drvdata(dev);
-	int ret;
-
-	ret = clk_prepare_enable(priv->clk);
-	if (ret)
-		dev_err(dev, "failed to enable clock\n");
-
-	return ret;
-}
-
-static const struct dev_pm_ops imx_mu_pm_ops = {
-	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(imx_mu_suspend_noirq,
-				      imx_mu_resume_noirq)
-	SET_RUNTIME_PM_OPS(imx_mu_runtime_suspend,
-			   imx_mu_runtime_resume, NULL)
-};
 
 static const struct imx_mu_dcfg imx_mu_cfg_imx6sx = {
 	.tx	= imx_mu_generic_tx,
@@ -705,10 +789,22 @@ static const struct imx_mu_dcfg imx_mu_cfg_imx7ulp = {
 	.xCR	= 0x64,
 };
 
+static const struct imx_mu_dcfg imx_mu_cfg_imx8_scu = {
+	.tx	= imx_mu_scu_tx,
+	.rx	= imx_mu_scu_rx,
+	.rxdb	= imx_mu_generic_rxdb,
+	.init	= imx_mu_init_scu,
+	.xTR	= {0x0, 0x4, 0x8, 0xc},
+	.xRR	= {0x10, 0x14, 0x18, 0x1c},
+	.xSR	= 0x20,
+	.xCR	= 0x24,
+};
+
 static const struct imx_mu_dcfg imx_mu_cfg_imx8_seco = {
 	.tx	= imx_mu_seco_tx,
+	.rx	= imx_mu_generic_rx,
 	.rxdb	= imx_mu_seco_rxdb,
-	.init	= imx_mu_seco_init,
+	.init	= imx_mu_init_seco,
 	.xTR	= {0x0, 0x4, 0x8, 0xc},
 	.xRR	= {0x10, 0x14, 0x18, 0x1c},
 	.xSR	= 0x20,
@@ -718,10 +814,67 @@ static const struct imx_mu_dcfg imx_mu_cfg_imx8_seco = {
 static const struct of_device_id imx_mu_dt_ids[] = {
 	{ .compatible = "fsl,imx7ulp-mu", .data = &imx_mu_cfg_imx7ulp },
 	{ .compatible = "fsl,imx6sx-mu", .data = &imx_mu_cfg_imx6sx },
+	{ .compatible = "fsl,imx8-mu-scu", .data = &imx_mu_cfg_imx8_scu },
 	{ .compatible = "fsl,imx8-mu-seco", .data = &imx_mu_cfg_imx8_seco },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, imx_mu_dt_ids);
+
+static int __maybe_unused imx_mu_suspend_noirq(struct device *dev)
+{
+	struct imx_mu_priv *priv = dev_get_drvdata(dev);
+
+	if (!priv->clk)
+		priv->xcr = imx_mu_read(priv, priv->dcfg->xCR);
+
+	return 0;
+}
+
+static int __maybe_unused imx_mu_resume_noirq(struct device *dev)
+{
+	struct imx_mu_priv *priv = dev_get_drvdata(dev);
+
+	/*
+	 * ONLY restore MU when context lost, the TIE could
+	 * be set during noirq resume as there is MU data
+	 * communication going on, and restore the saved
+	 * value will overwrite the TIE and cause MU data
+	 * send failed, may lead to system freeze. This issue
+	 * is observed by testing freeze mode suspend.
+	 */
+	if (!imx_mu_read(priv, priv->dcfg->xCR) && !priv->clk)
+		imx_mu_write(priv, priv->xcr, priv->dcfg->xCR);
+
+	return 0;
+}
+
+static int __maybe_unused imx_mu_runtime_suspend(struct device *dev)
+{
+	struct imx_mu_priv *priv = dev_get_drvdata(dev);
+
+	clk_disable_unprepare(priv->clk);
+
+	return 0;
+}
+
+static int __maybe_unused imx_mu_runtime_resume(struct device *dev)
+{
+	struct imx_mu_priv *priv = dev_get_drvdata(dev);
+	int ret;
+
+	ret = clk_prepare_enable(priv->clk);
+	if (ret)
+		dev_err(dev, "failed to enable clock\n");
+
+	return ret;
+}
+
+static const struct dev_pm_ops imx_mu_pm_ops = {
+	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(imx_mu_suspend_noirq,
+				      imx_mu_resume_noirq)
+	SET_RUNTIME_PM_OPS(imx_mu_runtime_suspend,
+			   imx_mu_runtime_resume, NULL)
+};
 
 static struct platform_driver imx_mu_driver = {
 	.probe		= imx_mu_probe,

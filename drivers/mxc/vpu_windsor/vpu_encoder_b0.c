@@ -4791,19 +4791,19 @@ static ssize_t show_fpsinfo(struct device *dev,
 
 		num += scnprintf(buf + num, PAGE_SIZE - num, "core[%d]\n", i);
 		for (j = 0; j < core->supported_instance_count; j++) {
-			struct vpu_attr *attr = &core->attr[j];
+			struct vpu_attr *attr_loc = &core->attr[j];
 
-			if (!attr->created)
+			if (!attr_loc->created)
 				continue;
 			num += scnprintf(buf + num, PAGE_SIZE - num,
 					"\t[%d]", j);
 			num += scnprintf(buf + num, PAGE_SIZE - num,
 					"  %3d(%d / %d)(setting)  ",
-					attr->param.uFrameRate,
-					attr->fival.numerator,
-					attr->fival.denominator);
-			num += show_fps_info(attr->statistic.fps,
-					ARRAY_SIZE(attr->statistic.fps),
+					attr_loc->param.uFrameRate,
+					attr_loc->fival.numerator,
+					attr_loc->fival.denominator);
+			num += show_fps_info(attr_loc->statistic.fps,
+					ARRAY_SIZE(attr_loc->statistic.fps),
 					buf + num, PAGE_SIZE - num);
 			num += scnprintf(buf + num, PAGE_SIZE - num, "\n");
 		}
@@ -5406,7 +5406,7 @@ static int create_vpu_video_device(struct vpu_dev *dev)
 	video_set_drvdata(dev->pvpu_encoder_dev, dev);
 
 	ret = video_register_device(dev->pvpu_encoder_dev,
-					VFL_TYPE_GRABBER,
+					VFL_TYPE_VIDEO,
 					ENCODER_NODE_NUMBER);
 	if (ret) {
 		vpu_err("unable to register video encoder device\n");

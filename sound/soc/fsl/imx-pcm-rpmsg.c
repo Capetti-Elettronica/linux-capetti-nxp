@@ -11,6 +11,8 @@
 #include <linux/dma-mapping.h>
 #include <linux/slab.h>
 #include <linux/module.h>
+#include <linux/rpmsg.h>
+#include <linux/imx_rpmsg.h>
 #include <linux/delay.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
@@ -25,7 +27,6 @@
 #define DRV_NAME	"imx_pcm_rpmsg"
 
 struct i2s_info *i2s_info_g;
-EXPORT_SYMBOL(i2s_info_g);
 
 static struct snd_pcm_hardware imx_rpmsg_pcm_hardware = {
 	.info = SNDRV_PCM_INFO_INTERLEAVED |
@@ -43,13 +44,14 @@ static struct snd_pcm_hardware imx_rpmsg_pcm_hardware = {
 	.fifo_size = 0,
 };
 
-static int imx_rpmsg_pcm_hw_params(struct snd_pcm_substream *substream,
-			      struct snd_pcm_hw_params *params)
+static int imx_rpmsg_pcm_hw_params(struct snd_soc_component *component,
+				   struct snd_pcm_substream *substream,
+				   struct snd_pcm_hw_params *params)
 {
 
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info  *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg *rpmsg;
@@ -90,17 +92,17 @@ static int imx_rpmsg_pcm_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-static int imx_rpmsg_pcm_hw_free(struct snd_pcm_substream *substream)
+static int imx_rpmsg_pcm_hw_free(struct snd_soc_component *component, struct snd_pcm_substream *substream)
 {
 	snd_pcm_set_runtime_buffer(substream, NULL);
 	return 0;
 }
 
-static snd_pcm_uframes_t imx_rpmsg_pcm_pointer(
+static snd_pcm_uframes_t imx_rpmsg_pcm_pointer(struct snd_soc_component *component,
 				struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	unsigned int pos = 0;
@@ -124,7 +126,7 @@ static void imx_rpmsg_timer_callback(struct timer_list *t)
 			from_timer(stream_timer, t, timer);
 	struct snd_pcm_substream *substream = stream_timer->substream;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -153,11 +155,11 @@ static void imx_rpmsg_timer_callback(struct timer_list *t)
 	spin_unlock_irqrestore(&i2s_info->wq_lock, flags);
 }
 
-static int imx_rpmsg_pcm_open(struct snd_pcm_substream *substream)
+static int imx_rpmsg_pcm_open(struct snd_soc_component *component, struct snd_pcm_substream *substream)
 {
 	int ret = 0;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -210,11 +212,11 @@ static int imx_rpmsg_pcm_open(struct snd_pcm_substream *substream)
 	return ret;
 }
 
-static int imx_rpmsg_pcm_close(struct snd_pcm_substream *substream)
+static int imx_rpmsg_pcm_close(struct snd_soc_component *component, struct snd_pcm_substream *substream)
 {
 	int ret = 0;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -242,11 +244,11 @@ static int imx_rpmsg_pcm_close(struct snd_pcm_substream *substream)
 	return ret;
 }
 
-static int imx_rpmsg_pcm_prepare(struct snd_pcm_substream *substream)
+static int imx_rpmsg_pcm_prepare(struct snd_soc_component *component, struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 
 	/* NON-MMAP mode, NONBLOCK, Version 2, enable lpa in dts
@@ -264,8 +266,9 @@ static int imx_rpmsg_pcm_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-static int imx_rpmsg_pcm_mmap(struct snd_pcm_substream *substream,
-	struct vm_area_struct *vma)
+static int imx_rpmsg_pcm_mmap(struct snd_soc_component *component,
+			      struct snd_pcm_substream *substream,
+			      struct vm_area_struct *vma)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 
@@ -285,7 +288,7 @@ static void imx_rpmsg_pcm_dma_complete(void *arg)
 static int imx_rpmsg_pcm_prepare_and_submit(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg   *rpmsg;
@@ -334,7 +337,7 @@ static int imx_rpmsg_pcm_prepare_and_submit(struct snd_pcm_substream *substream)
 static int imx_rpmsg_async_issue_pending(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai   *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info      *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -370,7 +373,7 @@ static int imx_rpmsg_async_issue_pending(struct snd_pcm_substream *substream)
 static int imx_rpmsg_restart(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai         *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s       *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info            *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -405,7 +408,7 @@ static int imx_rpmsg_restart(struct snd_pcm_substream *substream)
 static int imx_rpmsg_pause(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai         *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s       *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info            *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -440,7 +443,7 @@ static int imx_rpmsg_pause(struct snd_pcm_substream *substream)
 static int imx_rpmsg_terminate_all(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai         *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s       *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info            *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg     *rpmsg;
@@ -488,11 +491,11 @@ static int imx_rpmsg_terminate_all(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-int imx_rpmsg_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
+int imx_rpmsg_pcm_trigger(struct snd_soc_component *component, struct snd_pcm_substream *substream, int cmd)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai     *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s   *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	int ret = 0;
 
@@ -534,12 +537,12 @@ int imx_rpmsg_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 	return 0;
 }
 
-int imx_rpmsg_pcm_ack(struct snd_pcm_substream *substream)
+int imx_rpmsg_pcm_ack(struct snd_soc_component *component, struct snd_pcm_substream *substream)
 {
 	/*send the hw_avail size through rpmsg*/
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai         *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s       *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info            *i2s_info =  &rpmsg_i2s->i2s_info;
 	struct i2s_rpmsg           *rpmsg;
@@ -612,19 +615,6 @@ int imx_rpmsg_pcm_ack(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-static struct snd_pcm_ops imx_rpmsg_pcm_ops = {
-	.open		= imx_rpmsg_pcm_open,
-	.close		= imx_rpmsg_pcm_close,
-	.ioctl		= snd_pcm_lib_ioctl,
-	.hw_params	= imx_rpmsg_pcm_hw_params,
-	.hw_free	= imx_rpmsg_pcm_hw_free,
-	.trigger	= imx_rpmsg_pcm_trigger,
-	.pointer	= imx_rpmsg_pcm_pointer,
-	.mmap		= imx_rpmsg_pcm_mmap,
-	.ack		= imx_rpmsg_pcm_ack,
-	.prepare	= imx_rpmsg_pcm_prepare,
-};
-
 static int imx_rpmsg_pcm_preallocate_dma_buffer(struct snd_pcm *pcm,
 	int stream, int size)
 {
@@ -643,7 +633,7 @@ static int imx_rpmsg_pcm_preallocate_dma_buffer(struct snd_pcm *pcm,
 	return 0;
 }
 
-static void imx_rpmsg_pcm_free_dma_buffers(struct snd_pcm *pcm)
+static void imx_rpmsg_pcm_free_dma_buffers(struct snd_soc_component *component, struct snd_pcm *pcm)
 {
 	struct snd_pcm_substream *substream;
 	struct snd_dma_buffer *buf;
@@ -665,11 +655,11 @@ static void imx_rpmsg_pcm_free_dma_buffers(struct snd_pcm *pcm)
 	}
 }
 
-static int imx_rpmsg_pcm_new(struct snd_soc_pcm_runtime *rtd)
+static int imx_rpmsg_pcm_new(struct snd_soc_component *component, struct snd_soc_pcm_runtime *rtd)
 {
 	struct snd_card *card = rtd->card->snd_card;
 	struct snd_pcm *pcm = rtd->pcm;
-	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
 	struct fsl_rpmsg_i2s *rpmsg_i2s = dev_get_drvdata(cpu_dai->dev);
 	struct i2s_info *i2s_info =  &rpmsg_i2s->i2s_info;
 	int ret;
@@ -697,16 +687,24 @@ static int imx_rpmsg_pcm_new(struct snd_soc_pcm_runtime *rtd)
 out:
 	/* free preallocated buffers in case of error */
 	if (ret)
-		imx_rpmsg_pcm_free_dma_buffers(pcm);
+		imx_rpmsg_pcm_free_dma_buffers(component, pcm);
 
 	return ret;
 }
 
 static struct snd_soc_component_driver imx_rpmsg_soc_component = {
 	.name		= DRV_NAME,
-	.ops		= &imx_rpmsg_pcm_ops,
-	.pcm_new	= imx_rpmsg_pcm_new,
-	.pcm_free	= imx_rpmsg_pcm_free_dma_buffers,
+	.pcm_construct	= imx_rpmsg_pcm_new,
+	.pcm_destruct	= imx_rpmsg_pcm_free_dma_buffers,
+	.open		= imx_rpmsg_pcm_open,
+	.close		= imx_rpmsg_pcm_close,
+	.hw_params	= imx_rpmsg_pcm_hw_params,
+	.hw_free	= imx_rpmsg_pcm_hw_free,
+	.trigger	= imx_rpmsg_pcm_trigger,
+	.pointer	= imx_rpmsg_pcm_pointer,
+	.mmap		= imx_rpmsg_pcm_mmap,
+	.ack		= imx_rpmsg_pcm_ack,
+	.prepare	= imx_rpmsg_pcm_prepare,
 };
 
 int imx_rpmsg_platform_register(struct device *dev)
@@ -733,5 +731,163 @@ int imx_rpmsg_platform_register(struct device *dev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(imx_rpmsg_platform_register);
+
+static int i2s_rpmsg_cb(struct rpmsg_device *rpdev, void *data, int len,
+			void *priv, u32 src)
+{
+	struct i2s_rpmsg_r *msg = (struct i2s_rpmsg_r *)data;
+	struct i2s_rpmsg *rpmsg;
+	unsigned long flags;
+
+	dev_dbg(&rpdev->dev, "get from%d: cmd:%d. %d\n",
+				src, msg->header.cmd, msg->param.resp);
+
+	if (msg->header.type == I2S_TYPE_C) {
+		if (msg->header.cmd == I2S_TX_PERIOD_DONE) {
+			spin_lock_irqsave(&i2s_info_g->lock[0], flags);
+			rpmsg = &i2s_info_g->rpmsg[I2S_TX_PERIOD_DONE + I2S_TYPE_A_NUM];
+
+			if (msg->header.major == 1 && msg->header.minor == 2)
+				rpmsg->recv_msg.param.buffer_tail =
+							msg->param.buffer_tail;
+			else
+				rpmsg->recv_msg.param.buffer_tail++;
+
+			rpmsg->recv_msg.param.buffer_tail %=
+						i2s_info_g->num_period[0];
+
+			spin_unlock_irqrestore(&i2s_info_g->lock[0], flags);
+			i2s_info_g->callback[0](i2s_info_g->callback_param[0]);
+
+		} else if (msg->header.cmd == I2S_RX_PERIOD_DONE) {
+			spin_lock_irqsave(&i2s_info_g->lock[1], flags);
+			rpmsg = &i2s_info_g->rpmsg[I2S_RX_PERIOD_DONE + I2S_TYPE_A_NUM];
+
+			if (msg->header.major == 1 && msg->header.minor == 2)
+				rpmsg->recv_msg.param.buffer_tail =
+							msg->param.buffer_tail;
+			else
+				rpmsg->recv_msg.param.buffer_tail++;
+
+			rpmsg->recv_msg.param.buffer_tail %=
+						i2s_info_g->num_period[1];
+			spin_unlock_irqrestore(&i2s_info_g->lock[1], flags);
+			i2s_info_g->callback[1](i2s_info_g->callback_param[1]);
+		}
+	}
+
+	if (msg->header.type == I2S_TYPE_B) {
+		memcpy(&i2s_info_g->recv_msg, msg, sizeof(struct i2s_rpmsg_r));
+		complete(&i2s_info_g->cmd_complete);
+	}
+
+	return 0;
+}
+
+static int i2s_rpmsg_probe(struct rpmsg_device *rpdev)
+{
+	struct platform_device *codec_pdev;
+	struct fsl_rpmsg_i2s *rpmsg_i2s = NULL;
+	struct fsl_rpmsg_codec  rpmsg_codec[3];
+	int ret;
+
+	if (!i2s_info_g)
+		return 0;
+
+	i2s_info_g->rpdev = rpdev;
+
+	init_completion(&i2s_info_g->cmd_complete);
+
+	dev_info(&rpdev->dev, "new channel: 0x%x -> 0x%x!\n",
+			rpdev->src, rpdev->dst);
+
+	rpmsg_i2s = container_of(i2s_info_g, struct fsl_rpmsg_i2s, i2s_info);
+
+	if (rpmsg_i2s->codec_in_dt)
+		return 0;
+
+	if (rpmsg_i2s->codec_wm8960) {
+		rpmsg_codec[0].audioindex = rpmsg_i2s->codec_wm8960 >> 16;
+		rpmsg_codec[0].shared_lrclk = true;
+		rpmsg_codec[0].capless = false;
+		codec_pdev = platform_device_register_data(
+					&rpmsg_i2s->pdev->dev,
+					RPMSG_CODEC_DRV_NAME_WM8960,
+					PLATFORM_DEVID_NONE,
+					&rpmsg_codec[0], sizeof(struct fsl_rpmsg_codec));
+		if (IS_ERR(codec_pdev)) {
+			dev_err(&rpdev->dev,
+				"failed to register rpmsg audio codec\n");
+			ret = PTR_ERR(codec_pdev);
+			return ret;
+		}
+	}
+
+	if (rpmsg_i2s->codec_cs42888) {
+		rpmsg_codec[1].audioindex = rpmsg_i2s->codec_cs42888 >> 16;
+		strcpy(rpmsg_codec[1].name, "cs42888");
+		rpmsg_codec[1].num_adcs = 2;
+
+		codec_pdev = platform_device_register_data(
+					&rpmsg_i2s->pdev->dev,
+					RPMSG_CODEC_DRV_NAME_CS42888,
+					PLATFORM_DEVID_NONE,
+					&rpmsg_codec[1], sizeof(struct fsl_rpmsg_codec));
+		if (IS_ERR(codec_pdev)) {
+			dev_err(&rpdev->dev,
+				"failed to register rpmsg audio codec\n");
+			ret = PTR_ERR(codec_pdev);
+			return ret;
+		}
+	}
+
+	if (rpmsg_i2s->codec_ak4497) {
+		rpmsg_codec[2].audioindex = rpmsg_i2s->codec_ak4497 >> 16;
+		codec_pdev = platform_device_register_data(
+					&rpmsg_i2s->pdev->dev,
+					RPMSG_CODEC_DRV_NAME_AK4497,
+					PLATFORM_DEVID_NONE,
+					&rpmsg_codec[2], sizeof(struct fsl_rpmsg_codec));
+		if (IS_ERR(codec_pdev)) {
+			dev_err(&rpdev->dev,
+				"failed to register rpmsg audio codec\n");
+			ret = PTR_ERR(codec_pdev);
+			return ret;
+		}
+	}
+
+	return 0;
+}
+
+static void i2s_rpmsg_remove(struct rpmsg_device *rpdev)
+{
+	dev_info(&rpdev->dev, "i2s rpmsg driver is removed\n");
+}
+
+static struct rpmsg_device_id i2s_rpmsg_id_table[] = {
+	{ .name	= "rpmsg-audio-channel" },
+	{ },
+};
+
+static struct rpmsg_driver i2s_rpmsg_driver = {
+	.drv.name	= "i2s_rpmsg",
+	.drv.owner	= THIS_MODULE,
+	.id_table	= i2s_rpmsg_id_table,
+	.probe		= i2s_rpmsg_probe,
+	.callback	= i2s_rpmsg_cb,
+	.remove		= i2s_rpmsg_remove,
+};
+
+static int __init i2s_rpmsg_init(void)
+{
+	return register_rpmsg_driver(&i2s_rpmsg_driver);
+}
+
+static void __exit i2s_rpmsg_exit(void)
+{
+	unregister_rpmsg_driver(&i2s_rpmsg_driver);
+}
+module_init(i2s_rpmsg_init);
+module_exit(i2s_rpmsg_exit);
 
 MODULE_LICENSE("GPL");

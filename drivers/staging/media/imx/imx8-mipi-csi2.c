@@ -352,6 +352,9 @@ static int calc_hs_settle(struct mxc_mipi_csi2_dev *csi2dev, u32 dphy_clk)
 	u32 hs_settle_max;
 
 	esc_rate = clk_get_rate(csi2dev->clk_esc) / 1000000;
+	if (!esc_rate)
+		return 0;
+
 	hs_settle_min = 85 + 6 * 1000 / dphy_clk;
 	hs_settle_max = 145 + 10 * 1000 / dphy_clk;
 	hs_settle = (hs_settle_min + hs_settle_max) >> 1;
@@ -442,11 +445,13 @@ static int mipi_sc_fw_init(struct mxc_mipi_csi2_dev *csi2dev, char enable)
 static uint16_t find_hs_configure(struct v4l2_subdev_format *sd_fmt)
 {
 	struct v4l2_mbus_framefmt *fmt = &sd_fmt->format;
-	u32 frame_rate = fmt->reserved[1];
+	u32 frame_rate;
 	int i;
 
 	if (!fmt)
 		return -EINVAL;
+
+	frame_rate = fmt->reserved[1];
 
 	for (i = 0; i < ARRAY_SIZE(hs_setting); i++) {
 		if (hs_setting[i].width  == fmt->width &&
@@ -991,7 +996,7 @@ static int mipi_csi2_parse_dt(struct mxc_mipi_csi2_dev *csi2dev)
 
 	node = of_graph_get_next_endpoint(node, NULL);
 	if (!node) {
-		dev_err(dev, "No port node at %s\n", node->full_name);
+		dev_err(dev, "No port node\n");
 		return -EINVAL;
 	}
 

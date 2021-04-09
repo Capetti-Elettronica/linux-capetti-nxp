@@ -2,10 +2,8 @@
 #ifndef _ASM_GENERIC_GPIO_H
 #define _ASM_GENERIC_GPIO_H
 
-#include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/errno.h>
-#include <linux/of.h>
 
 #ifdef CONFIG_GPIOLIB
 
@@ -127,12 +125,6 @@ static inline int gpio_export(unsigned gpio, bool direction_may_change)
 	return gpiod_export(gpio_to_desc(gpio), direction_may_change);
 }
 
-int __gpiod_export(struct gpio_desc *desc, bool direction_may_change, const char *name);
-static inline int gpio_export_with_name(unsigned gpio, bool direction_may_change, const char *name)
-{
-	return __gpiod_export(gpio_to_desc(gpio), direction_may_change, name);
-}
-
 static inline int gpio_export_link(struct device *dev, const char *name,
 				   unsigned gpio)
 {
@@ -145,6 +137,8 @@ static inline void gpio_unexport(unsigned gpio)
 }
 
 #else	/* !CONFIG_GPIOLIB */
+
+#include <linux/kernel.h>
 
 static inline bool gpio_is_valid(int number)
 {

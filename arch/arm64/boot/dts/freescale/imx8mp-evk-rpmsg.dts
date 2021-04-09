@@ -24,17 +24,21 @@
 			reg = <0 0x80000000 0 0x1000000>;
 		};
 
+		rsc_table: rsc_table@55000000 {
+			reg = <0 0x55000000 0 0x8000>;
+			no-map;
+		};
+
 		vdev0vring0: vdev0vring0@55000000 {
-			compatible = "shared-dma-pool";
 			reg = <0 0x55000000 0 0x8000>;
 			no-map;
 		};
 
 		vdev0vring1: vdev0vring1@55008000 {
-			compatible = "shared-dma-pool";
 			reg = <0 0x55008000 0 0x8000>;
 			no-map;
 		};
+
 		vdevbuffer: vdevbuffer@55400000 {
 			compatible = "shared-dma-pool";
 			reg = <0 0x55400000 0 0x100000>;
@@ -78,7 +82,6 @@
 			"LINPUT1", "MICB",
 			"LINPUT3", "MICB";
 	};
-
 	imx8mp-cm7 {
 		compatible = "fsl,imx8mn-cm7";
 		rsc-da = <0x55000000>;
@@ -87,7 +90,7 @@
 		mboxes = <&mu 0 1
 			  &mu 1 1
 			  &mu 3 1>;
-		memory-region = <&vdev0vring0>, <&vdev0vring1>, <&vdevbuffer>;
+		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
 		status = "okay";
 	};
 };
@@ -174,7 +177,7 @@
 	status = "disabled";
 };
 
-&sdma1{
+&sai3 {
 	status = "disabled";
 };
 
@@ -183,9 +186,5 @@
 };
 
 &uart4 {
-	status = "disabled";
-};
-
-&sai3 {
 	status = "disabled";
 };

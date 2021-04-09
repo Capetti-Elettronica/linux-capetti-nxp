@@ -33,6 +33,11 @@
 		#size-cells = <1>;
 		ranges;
 
+		rsc_table: rsc_table@1fff8000{
+			reg = <0x1fff8000 0x1000>;
+			no-map;
+		};
+
 		vdev0vring0: vdev0vring0@9ff00000 {
 			reg = <0x9ff00000 0x8000>;
 			no-map;
@@ -259,12 +264,12 @@
 			  &mu 1 1
 			  &mu 3 1>;
 		memory-region = <&vdev0vring0>, <&vdev0vring1>,
-				<&vdev1vring0>, <&vdev1vring1>;
+				<&vdev1vring0>, <&vdev1vring1>, <&rsc_table>;
 	};
 };
 
 &cpu0 {
-	arm-supply= <&sw1_reg>;
+	cpu-supply= <&sw1_reg>;
 };
 
 &lpspi3 {
@@ -447,6 +452,9 @@
 };
 
 &usdhc0 {
+	assigned-clocks = <&scg1 IMX7ULP_CLK_APLL_PFD1>, <&pcc2 IMX7ULP_CLK_USDHC0>;
+	assigned-clock-parents = <0>, <&scg1 IMX7ULP_CLK_APLL_PFD1>;
+	assigned-clock-rates = <0>, <352800000>;
 	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
 	pinctrl-0 = <&pinctrl_usdhc0>;
 	pinctrl-1 = <&pinctrl_usdhc0>;
@@ -460,6 +468,9 @@
 };
 
 &usdhc1 {
+	assigned-clocks = <&scg1 IMX7ULP_CLK_APLL_PFD1>, <&pcc2 IMX7ULP_CLK_USDHC1>;
+	assigned-clock-parents = <0>, <&scg1 IMX7ULP_CLK_APLL_PFD1>;
+	assigned-clock-rates = <0>, <352800000>;
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_usdhc1>;
 	pinctrl-1 = <&pinctrl_usdhc1>;

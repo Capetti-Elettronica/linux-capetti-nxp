@@ -57,13 +57,13 @@ struct imx_sc_msg_gpio_get_pad_wakeup {
 			u8 wakeup;
 		} resp;
 	} data;
-} __packed;
+} __packed __aligned(4);
 
 struct imx_sc_msg_gpio_set_pad_wakeup {
 	struct imx_sc_rpc_msg hdr;
 	u16 pad;
 	u8 wakeup;
-} __packed;
+} __packed __aligned(4);
 
 #endif
 
@@ -204,6 +204,7 @@ static const struct of_device_id mxc_gpio_dt_ids[] = {
 	{ .compatible = "fsl,imx7d-gpio", .data = &mxc_gpio_devtype[IMX35_GPIO], },
 	{ /* sentinel */ }
 };
+MODULE_DEVICE_TABLE(of, mxc_gpio_dt_ids);
 
 /*
  * MX2 has one interrupt *for all* gpio ports. The list is used
@@ -589,7 +590,7 @@ static int mxc_gpio_probe(struct platform_device *pdev)
 	struct device_node *np = pdev->dev.of_node;
 	struct mxc_gpio_port *port;
 	int irq_count;
-	int irq_base = 0;
+	int irq_base;
 	int err;
 #ifdef CONFIG_GPIO_MXC_PAD_WAKEUP
 	int i;
@@ -612,7 +613,7 @@ static int mxc_gpio_probe(struct platform_device *pdev)
 		return irq_count;
 
 	if (irq_count > 1) {
-		port->irq_high = platform_get_irq(pdev, 1);
+		port->irq_high = platform_get_irq_optional(pdev, 1);
 		if (port->irq_high < 0)
 			port->irq_high = 0;
 	}
@@ -699,11 +700,6 @@ static int mxc_gpio_probe(struct platform_device *pdev)
 			 BGPIOF_READ_OUTPUT_REG_SET);
 	if (err)
 		goto out_bgio;
-
-	if (of_property_read_bool(np, "gpio-ranges")) {
-		port->gc.request = gpiochip_generic_request;
-		port->gc.free = gpiochip_generic_free;
-	}
 
 	if (of_property_read_bool(np, "gpio_ranges"))
 		port->gpio_ranges = true;
@@ -897,4 +893,7 @@ static int __init gpio_mxc_init(void)
 	return platform_driver_register(&mxc_gpio_driver);
 }
 subsys_initcall(gpio_mxc_init);
-MODULE_LICENSE("GPL v2");
+
+MODULE_AUTHOR("Shawn Guo <shawn.guo@linaro.org>");
+MODULE_DESCRIPTION("i.MX GPIO Driver");
+MODULE_LICENSE("GPL");
