@@ -417,7 +417,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>;
 	no-1-8-v;
-	//cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
+	cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
 	broken-cd;
 	vmmc-supply = <&reg_sd1_vmmc>;
 	enable-sdio-wakeup;
