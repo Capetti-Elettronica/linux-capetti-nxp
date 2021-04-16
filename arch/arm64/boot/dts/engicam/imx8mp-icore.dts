@@ -287,8 +287,8 @@
 		compatible = "nxp,pca9450c";
 		/* PMIC PCA9450 PMIC_nINT GPIO1_IO3 */
 		pinctrl-0 = <&pinctrl_pmic>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <3 GPIO_ACTIVE_LOW>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <1 GPIO_ACTIVE_LOW>;
 
 		regulators {
 			buck1: BUCK1 {
