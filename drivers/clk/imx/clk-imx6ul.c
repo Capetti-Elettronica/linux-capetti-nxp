@@ -501,6 +501,11 @@ static void __init imx6ul_clocks_init(struct device_node *ccm_node)
         else
 		clk_set_parent(hws[IMX6UL_CLK_UART_SEL]->clk, hws[IMX6UL_CLK_PLL3_80M]->clk);
 
+	clk_prepare_enable(hws[IMX6UL_CLK_CKO]->clk);
+	clk_prepare_enable(hws[IMX6UL_CLK_CKO2]->clk);
+	clk_set_parent(hws[IMX6UL_CLK_CKO2_SEL]->clk, hws[IMX6UL_CLK_OSC]->clk);
+	clk_set_parent(hws[IMX6UL_CLK_CKO]->clk, hws[IMX6UL_CLK_CKO2]->clk);
+
 	if (clk_on_imx6ull())
 		clk_prepare_enable(hws[IMX6UL_CLK_AIPSTZ3]->clk);
 
