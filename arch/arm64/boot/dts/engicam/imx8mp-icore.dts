@@ -12,7 +12,7 @@
 
 / {
 	model = "Engicam i.Core i.MX8MPlus  StarterKit (459B)";
-	compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
+	compatible = "engi,icore-imx8mp", "fsl,imx8mp";
 
 	reserved-memory {
 		#address-cells = <2>;
