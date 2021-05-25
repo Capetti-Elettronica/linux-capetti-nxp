@@ -155,7 +155,7 @@ static void st1232_ts_power_off(void *data)
 }
 
 static const struct st_chip_info st1232_chip_info = {
-	.have_z		= true,
+	.have_z		= false,
 	.max_x		= 0x31f, /* 800 - 1 */
 	.max_y		= 0x1df, /* 480 -1 */
 	.max_area	= 0xff,
