@@ -434,33 +434,6 @@
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
 
-	ov5640_0: ov5640_mipi@3c {
-		compatible = "ovti,ov5640";
-		reg = <0x3c>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_csi0_pwn>, <&pinctrl_csi0_rst>;
-		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		clock-names = "xclk";
-		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
-		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
-		assigned-clock-rates = <24000000>;
-		csi_id = <0>;
-		powerdown-gpios = <&gpio2 20 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpio2 7 GPIO_ACTIVE_LOW>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-		mipi_csi;
-		status = "okay";
-
-		port {
-			ov5640_mipi_0_ep: endpoint {
-				remote-endpoint = <&mipi_csi0_ep>;
-				data-lanes = <1 2>;
-				clock-lanes = <0>;
-			};
-		};
-	};
-
 	polytouch: edt-ft5x26@38 {
 		compatible = "edt,edt-ft5x26";
 		reg = <0x38>;
@@ -500,23 +473,57 @@
 		compatible = "ovti,ov5640";
 		reg = <0x3c>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_csi0_pwn>, <&pinctrl_csi0_rst>, <&pinctrl_csi_mclk>;
+		pinctrl-0 = <&pinctrl_csi1_pwn>, <&pinctrl_csi1_rst>;
 		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 		clock-names = "xclk";
 		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
 		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
 		assigned-clock-rates = <24000000>;
 		csi_id = <0>;
-		powerdown-gpios = <&gpio4 1 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpio4 0 GPIO_ACTIVE_LOW>;
+		powerdown-gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
 		mclk = <24000000>;
 		mclk_source = <0>;
 		mipi_csi;
-		status = "disabled";
+		status = "okay";
 
 		port {
 			ov5640_mipi_1_ep: endpoint {
 				remote-endpoint = <&mipi_csi1_ep>;
+				data-lanes = <1 2>;
+				clock-lanes = <0>;
+			};
+		};
+	};
+};
+
+&i2c5 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c5>;
+	status = "okay";
+
+	ov5640_0: ov5640_mipi@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi0_pwn>, <&pinctrl_csi0_rst>;
+		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+		clock-names = "xclk";
+		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
+		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
+		assigned-clock-rates = <24000000>;
+		csi_id = <0>;
+		powerdown-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 7 GPIO_ACTIVE_LOW>;
+		mclk = <24000000>;
+		mclk_source = <0>;
+		mipi_csi;
+		status = "okay";
+
+		port {
+			ov5640_mipi_0_ep: endpoint {
+				remote-endpoint = <&mipi_csi0_ep>;
 				data-lanes = <1 2>;
 				clock-lanes = <0>;
 			};
@@ -935,6 +942,14 @@
 		>;
 	};
 
+
+	pinctrl_i2c5: i2c5grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SAI5_RXD0__I2C5_SCL			0x400001c3
+			MX8MP_IOMUXC_SAI5_MCLK__I2C5_SDA			0x400001c3
+		>;
+	};
+
 	edt_ft5x06_pins: edt-ft5x06-pins-grp{
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI1_RXD7__GPIO4_IO09		0x41	/* INT */
@@ -1089,7 +1104,6 @@
 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1	0x1d0
 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2	0x1d0
 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3	0x1d0
-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT	0xc1
 		>;
 	};
 
@@ -1101,7 +1115,6 @@
 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1	0x1d4
 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2	0x1d4
 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3	0x1d4
-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 0xc1
 		>;
 	};
 
@@ -1113,7 +1126,6 @@
 			MX8MP_IOMUXC_SD2_DATA1__USDHC2_DATA1	0x1d6
 			MX8MP_IOMUXC_SD2_DATA2__USDHC2_DATA2	0x1d6
 			MX8MP_IOMUXC_SD2_DATA3__USDHC2_DATA3	0x1d6
-			MX8MP_IOMUXC_GPIO1_IO04__USDHC2_VSELECT 0xc1
 		>;
 	};
 
@@ -1173,19 +1185,25 @@
 
 	pinctrl_csi0_pwn: csi0_pwn_grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SD2_WP__GPIO2_IO20		0x19
+			MX8MP_IOMUXC_GPIO1_IO04__GPIO1_IO04		0x19
 		>;
 	};
 
 	pinctrl_csi0_rst: csi0_rst_grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SD1_DATA5__GPIO2_IO07	0x19
+			MX8MP_IOMUXC_GPIO1_IO07__GPIO1_IO07	0x19
 		>;
 	};
 
-	pinctrl_csi_mclk: csi_mclk_grp {
+	pinctrl_csi1_pwn: csi1_pwn_grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO15__CCM_CLKO2	0x59
+			MX8MP_IOMUXC_GPIO1_IO00__GPIO1_IO00		0x19
+		>;
+	};
+
+	pinctrl_csi1_rst: csi1_rst_grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05	0x19
 		>;
 	};
 };
@@ -1238,7 +1256,7 @@
 &mipi_csi_1 {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	status = "disabled";
+	status = "okay";
 
 	port@1 {
 		reg = <1>;
@@ -1269,7 +1287,7 @@
 };
 
 &isi_1 {
-	status = "disabled";
+	status = "okay";
 
 	cap_device {
 		status = "okay";
