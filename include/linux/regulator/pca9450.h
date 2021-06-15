@@ -216,4 +216,5 @@ enum {
 #define IRQ_THERM_105			0x02
 #define IRQ_THERM_125			0x01
 
+
 #endif /* __LINUX_REG_PCA9450_H__ */
