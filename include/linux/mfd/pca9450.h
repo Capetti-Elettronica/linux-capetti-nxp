@@ -92,6 +92,9 @@ enum {
 	PCA9450_MAX_REGISTER	= 0x2F,
 };
 
+/* PCA9450_BUCK123_DVS */
+#define BUCK123_PRESET_EN		0x80
+
 /* PCA9450 BUCK ENMODE bits */
 #define BUCK_ENMODE_OFF			0x00
 #define BUCK_ENMODE_ONREQ		0x01
@@ -230,6 +233,7 @@ enum {
 struct pca9450_board {
 	struct regulator_init_data *init_data[PCA9450_REGULATOR_CNT];
 	int	gpio_intr;
+	int	i2c_lt_en;
 	int	irq_base;
 };
 

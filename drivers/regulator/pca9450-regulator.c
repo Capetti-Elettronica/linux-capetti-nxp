@@ -594,6 +594,12 @@ static int pca9450_buck123_dvs_init(struct pca9450_pmic *pmic)
 			}
 		}
 	}
+	/* clear the preset enable bit as we use PCA9450_BUCKxOUT_DVSy regs */
+	ret = pca9450_clear_bits(pca9450, PCA9450_BUCK123_DVS, \
+				 BUCK123_PRESET_EN);
+	if (ret < 0)
+		return ret;
+
 	return 0;
 }
 
@@ -739,6 +745,15 @@ static int pca9450_probe(struct platform_device *pdev)
 		goto err;
 	}
 
+
+	/* setting WDOG_B behaviours */
+	ret = pca9450_reg_write(pca9450, PCA9450_RESET_CTRL, 0x40);
+	if (ret < 0) {
+		dev_err(&pdev->dev, "Write 'PCA9450_RESET_CTRL': failed!\n");
+		ret = -EIO;
+		goto err;
+	}
+
 	return 0;
 
 err:
@@ -778,6 +793,6 @@ static struct platform_driver pca9450_driver = {
 };
 module_platform_driver(pca9450_driver);
 
-MODULE_DESCRIPTION("PCA9450 voltage regulator driver");
+MODULE_DESCRIPTION("pca9450 voltage regulator driver");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:pca9450-pmic");
