@@ -578,6 +578,8 @@ static void option_instat_callback(struct urb *urb);
 /* Device needs ZLP */
 #define ZLP		BIT(17)
 
+#define SIMCOM_SIM7600_VID	0x1E0E
+#define SIMCOM_SIM7600_PID	0x9001
 
 static const struct usb_device_id option_ids[] = {
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_COLT) },
@@ -1089,6 +1091,8 @@ static const struct usb_device_id option_ids[] = {
 	{ USB_DEVICE(QUALCOMM_VENDOR_ID, 0x0023)}, /* ONYX 3G device */
 	{ USB_DEVICE(QUALCOMM_VENDOR_ID, 0x9000), /* SIMCom SIM5218 */
 	  .driver_info = NCTRL(0) | NCTRL(1) | NCTRL(2) | NCTRL(3) | RSVD(4) },
+	{ USB_DEVICE(SIMCOM_SIM7600_VID, SIMCOM_SIM7600_PID), /* SIMCom SIM7600 */
+	  .driver_info = RSVD(5) },
 	/* Quectel products using Qualcomm vendor ID */
 	{ USB_DEVICE(QUALCOMM_VENDOR_ID, QUECTEL_PRODUCT_UC15)},
 	{ USB_DEVICE(QUALCOMM_VENDOR_ID, QUECTEL_PRODUCT_UC20),

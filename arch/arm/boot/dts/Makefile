@@ -701,7 +701,8 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ulz-14x14-evk-gpmi-weim.dtb \
 	imx6ulz-14x14-evk-emmc.dtb \
 	imx6ull-microgea-microdev.dtb \
-	imx6ull-microgea-microdev-lcd7.dtb
+	imx6ull-microgea-microdev-lcd7.dtb \
+	imx6ull-microgea-microdev-rev3.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
 	imx7d-cl-som-imx7.dtb \
 	imx7d-colibri-aster.dtb \
