@@ -42,7 +42,7 @@
 
 		USB_TYPE_SEL {
 			gpio-export,name = "usb_type_select";
-			gpio-export,output = <1>;
+			gpio-export,output = <0>;
 			gpios = <&gpio4 2 0>;
 		};
 
@@ -714,11 +714,7 @@
 };
 
 &usb_dwc3_0 {
-	dr_mode = "otg";
-	hnp-disable;
-	srp-disable;
-	adp-disable;
-	usb-role-switch;
+	dr_mode = "host";
 	status = "okay";
 };
 
