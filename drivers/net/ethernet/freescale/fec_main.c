@@ -2071,8 +2071,17 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
 			fep->ptp_clk_on = false;
 			mutex_unlock(&fep->ptp_clk_mutex);
 		}
-		clk_disable_unprepare(fep->clk_ref);
-		clk_disable_unprepare(fep->clk_2x_txclk);
+		if (of_machine_is_compatible("fsl,imx6ul") ||
+			of_machine_is_compatible("fsl,imx6ull"))
+		{
+			//clk_disable_unprepare(fep->clk_ref);
+			clk_disable_unprepare(fep->clk_2x_txclk);
+		}
+		else
+		{
+			clk_disable_unprepare(fep->clk_ref);
+			clk_disable_unprepare(fep->clk_2x_txclk);
+		}
 	}
 
 	return 0;
