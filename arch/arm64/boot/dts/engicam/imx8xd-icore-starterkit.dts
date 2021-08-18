@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2017-2020 NXP
+ */
+
+/dts-v1/;
+
+#include "imx8xq-icore-starterkit.dts"
+
+/ {
+
+	model = "Engicam i.Core MX8DXP StarterKit (459B)";
+	compatible = "fsl,imx8qxp", "fsl,imx8dxp";
+	
+	/*/delete-node/ memory@80000000;
+	
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x00000000 0x80000000 0 0x40000000>;
+	};*/
+
+};
+
+&cpus {
+	/delete-node/ cpu@2;
+	/delete-node/ cpu@3;
+};
+
+&thermal_zones {
+	cpu-thermal0 {
+		cooling-maps {
+			map0 {
+				cooling-device =
+				<&A35_0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+				<&A35_1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+			};
+		};
+	};
+};
