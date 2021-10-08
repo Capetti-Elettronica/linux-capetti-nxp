@@ -29,25 +29,6 @@
 		stdout-path = &uart2;
 	};
 
-
-	gpio_export {
-		compatible = "gpio-export";
-		#size-cells = <0>;
-
-		MUCCA
-		{
-			gpio-export,name = "muccan";
-			gpios = <&gpio5 14 0>;
-		};
-
-	/*ETH_SW_RST_N {
-			gpio-export,name = "eth_sw_rst_n";
-			gpio-export,output = <1>;
-			gpios = <&gpio1 01 0>;
-			};*/
-
-	};
-
 	reg_usb1_host_vbus: regulator-usb1-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "usb1_host_vbus";
@@ -621,8 +602,7 @@
 	status = "okay";
 };
 
-&uart3 { /* R
-	*/
+&uart3 { /* BT UART */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	assigned-clocks = <&clk IMX8MP_CLK_UART3>;
@@ -867,7 +847,7 @@
 
 	pinctrl_i2c6: i2c6grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SAI5_RXFS__I2C6_SCL		0x400001c3
+			MX8MP_IOMUXC_SAI5_RXFS__I2C6_SCL	0x400001c3
 			MX8MP_IOMUXC_SAI5_RXC__I2C6_SDA		0x400001c3
 		>;
 	};
