@@ -95,6 +95,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm8>;
 	status = "okay";
+  #pwm-cells = <2>;
 };
 
 
