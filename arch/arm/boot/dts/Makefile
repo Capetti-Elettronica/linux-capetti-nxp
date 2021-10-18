@@ -702,6 +702,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ulz-14x14-evk-emmc.dtb \
 	imx6ull-microgea-microdev.dtb \
 	imx6ull-microgea-microdev-lcd7.dtb \
+	imx6ull-microgea-microdev-lcd7-can.dtb \
 	imx6ull-microgea-microdev-rev3.dtb \
 	imx6ull-gea-starterkit.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
