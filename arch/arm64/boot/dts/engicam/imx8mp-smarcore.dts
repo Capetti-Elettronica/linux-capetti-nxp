@@ -559,10 +559,6 @@
 	status = "okay";
 };
 
-&irqsteer_hdmi {
-	status = "okay";
-};
-
 &hdmi_blk_ctrl {
 	status = "okay";
 };
@@ -687,11 +683,17 @@
 };
 
 &usb_dwc3_0 {
+	hnp-disable;
+	srp-disable;
+	adp-disable;
+	usb-role-switch;  
 	dr_mode = "host";
 	status = "okay";
 };
 
 &usb3_phy1 {
+  fsl,phy-tx-preemp-amp-tune = <3>;
+	fsl,phy-tx-vref-tune = <0xb>;
 	status = "okay";
 };
 
@@ -766,6 +768,10 @@
 };
 
 &vpu_vc8000e {
+	status = "okay";
+};
+
+&vpu_v4l2 {
 	status = "okay";
 };
 
