@@ -360,6 +360,10 @@ static int goodix_ts_read_input_report(struct goodix_ts_data *ts, u8 *data)
 		}
 
 		if (data[0] & GOODIX_BUFFER_STATUS_READY) {
+			if (!(data[0] & 0x80))
+			{
+				return -EAGAIN;
+			}
 			touch_num = data[0] & 0x0f;
 			if (touch_num > ts->max_touch_num)
 				return -EPROTO;
@@ -483,7 +487,7 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 
 	if (goodix_i2c_write_u8(ts->client, GOODIX_READ_COOR_ADDR, 0) < 0)
 		dev_err(&ts->client->dev, "I2C write end_cmd error\n");
-
+	msleep(2);
 	return IRQ_HANDLED;
 }
 
@@ -731,7 +735,6 @@ static int goodix_reset(struct goodix_ts_data *ts)
 	error = goodix_irq_direction_output(ts, ts->client->addr == 0x14);
 	if (error)
 		return error;
-
 	usleep_range(100, 2000);		/* T3: > 100us */
 
 	error = gpiod_direction_output(ts->gpiod_rst, 1);
@@ -952,7 +955,7 @@ retry_get_irq_gpio:
 			ts->irq_pin_access_method = IRQ_PIN_ACCESS_NONE;
 		break;
 	default:
-		if (ts->gpiod_int && ts->gpiod_rst) {
+		if (/*ts->gpiod_int &&*/ ts->gpiod_rst) {
 			ts->reset_controller_at_probe = true;
 			ts->load_cfg_from_disk = true;
 			ts->irq_pin_access_method = IRQ_PIN_ACCESS_GPIO;
@@ -1181,14 +1184,12 @@ static void goodix_config_cb(const struct firmware *cfg, void *ctx)
 {
 	struct goodix_ts_data *ts = ctx;
 	int error;
-
 	if (cfg) {
 		/* send device configuration to the firmware */
 		error = goodix_send_cfg(ts, cfg->data, cfg->size);
 		if (error)
 			goto err_release_cfg;
 	}
-
 	goodix_configure_dev(ts);
 
 err_release_cfg:
@@ -1225,7 +1226,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 	i2c_set_clientdata(client, ts);
 	init_completion(&ts->firmware_loading_complete);
 	ts->contact_size = GOODIX_CONTACT_SIZE;
-
 	error = goodix_get_gpio_config(ts);
 	if (error)
 		return error;
@@ -1247,7 +1247,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 		regulator_disable(ts->avdd28);
 		return error;
 	}
-
 	error = devm_add_action_or_reset(&client->dev,
 					 goodix_disable_regulators, ts);
 	if (error)
@@ -1256,13 +1255,13 @@ static int goodix_ts_probe(struct i2c_client *client,
 reset:
 	if (ts->reset_controller_at_probe) {
 		/* reset the controller */
+		printk("MP: Goodix reset");
 		error = goodix_reset(ts);
 		if (error) {
 			dev_err(&client->dev, "Controller reset failed.\n");
 			return error;
 		}
 	}
-
 	error = goodix_i2c_test(client);
 	if (error) {
 		if (!ts->reset_controller_at_probe &&
@@ -1282,7 +1281,6 @@ reset:
 	}
 
 	ts->chip = goodix_get_chip_data(ts->id);
-
 	if (ts->load_cfg_from_disk) {
 		/* update device config */
 		ts->cfg_name = devm_kasprintf(&client->dev, GFP_KERNEL,
@@ -1290,9 +1288,12 @@ reset:
 		if (!ts->cfg_name)
 			return -ENOMEM;
 
+		goodix_config_cb(NULL,ts);
+		#if 0
 		error = request_firmware_nowait(THIS_MODULE, true, ts->cfg_name,
 						&client->dev, GFP_KERNEL, ts,
 						goodix_config_cb);
+		#endif
 		if (error) {
 			dev_err(&client->dev,
 				"Failed to invoke firmware loader: %d\n",
@@ -1306,7 +1307,6 @@ reset:
 		if (error)
 			return error;
 	}
-
 	return 0;
 }
 
