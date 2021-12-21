@@ -13,11 +13,11 @@
  * GNU General Public License for more details.
  */
 
-#include "imx8mm-icore-ctouch2-rs232.dts"
+#include "imx8mm-icore-ctouch2.dts"
 / {
 
-	model = "Engicam i.Core MX8MM CTOUCH2.0 + Second UART232 + YES7";
-  
+	model = "Engicam i.Core MX8MM CTOUCH2.0 + YES7";
+
   gpio_export {
 		compatible = "gpio-export";
 		#size-cells = <0>;

@@ -7,6 +7,7 @@
 /dts-v1/;
 
 #include <dt-bindings/usb/pd.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include "../freescale/imx8mm.dtsi"
 
 / {
@@ -26,6 +27,48 @@
 
 	chosen {
 		stdout-path = &uart2;
+	};
+
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&gpio1 2 0>;
+		priority = <128>;
+		active-delay = <100>;
+		inactive-delay = <100>;
+		wait-delay = <3000>;
+	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		GPIO_A {
+			gpio-export,name = "GPIO_A";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&gpio3 20 0>;
+		};
+
+		GPIO_B {
+			gpio-export,name = "GPIO_B";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&gpio3 21 0>;
+		};
+
+		GPIO_C {
+			gpio-export,name = "GPIO_C";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&gpio3 24 0>;
+		};
+
+		GPIO_D {
+			gpio-export,name = "GPIO_D";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&gpio4 24 0>;
+		};
 	};
 
 	backlight_lvds: backlight_lvds {
@@ -240,6 +283,10 @@
 		<&clk IMX8MM_AUDIO_PLL1_OUT>, <&clk IMX8MM_AUDIO_PLL2_OUT>;
 	clock-names = "core", "rxtx0", "rxtx1", "rxtx2", "rxtx3",
 		"rxtx4", "rxtx5", "rxtx6", "rxtx7", "spba", "pll8k", "pll11k";
+	status = "disabled";
+};
+
+&snvs_rtc {
 	status = "disabled";
 };
 

@@ -16,7 +16,7 @@
 #include "imx8mm-icore-ctouch2.dts"
 
 / {
-	model = "Engicam i.Core MX8MM CTOUCH2.0 AM10";
+	model = "Engicam i.Core MX8MM CTOUCH2.0 + AMP10";
 };
 
 &i2c4 {

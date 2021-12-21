@@ -7,7 +7,7 @@
 #include "imx8mm-icore-ctouch2-rs232.dts"
 
 / {
-	model = "Engicam i.Core MX8MM CTOUCH2.0 AM10";
+	model = "Engicam i.Core MX8MM CTOUCH2.0 + Second UART232 + AMP10";
 };
 
 &i2c4 {
