@@ -7,6 +7,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8mp-smarcore.dtb \
 			  imx8mp-smarcore-pcie.dtb \
 			  imx8mp-icore-2e.dtb \
+			  imx8mp-icore-2e-net-phy.dtb \
 			  imx8mm-icore.dtb \
 			  imx8mm-icore-ctouch2.dtb \
 			  imx8mm-icore-ctouch2-amp10.dtb \
