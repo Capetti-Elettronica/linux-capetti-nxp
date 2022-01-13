@@ -330,7 +330,7 @@
 			  <&clk IMX8MP_CLK_PCIE_AUX>;
 	assigned-clock-parents = <&clk IMX8MP_SYS_PLL2_500M>,
 				 <&clk IMX8MP_SYS_PLL2_50M>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie_phy{
@@ -389,27 +389,6 @@
 &usb_dwc3_1 {
 	dr_mode = "host";
 	status = "okay";
-};
-
-/* WIFI */
-&usdhc1 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_laird>;
-	bus-width = <4>;
-	mo-1-8-v;
-	pm-ignore-notify;
-	keep-power-in-suspend;
-	vmmc-supply = <&wl_reg_on>;
-	non-removable;
-	status = "okay";
-
-	brcmf: bcrmf@1 {
-		reg = <1>;
-		compatible = "brcm,bcm4329-fmac";
-	};
-
 };
 
 /* SDCARD */
@@ -718,13 +697,6 @@
 			MX8MP_IOMUXC_SD1_DATA1__USDHC1_DATA1	0x1d6
 			MX8MP_IOMUXC_SD1_DATA2__USDHC1_DATA2	0x1d6
 			MX8MP_IOMUXC_SD1_DATA3__USDHC1_DATA3	0x1d6
-		>;
-	};
-
-	pinctrl_laird: lairdgrp {
-		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06 	0x41
-			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05	0x41
 		>;
 	};
 
