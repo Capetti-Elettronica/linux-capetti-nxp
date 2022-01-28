@@ -376,6 +376,14 @@
 	status = "okay";
 };
 
+/* RS485 */
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>;
+	fsl,uart-has-rtscts;
+	status = "okay";
+};
+
 /* SER1_EXT */
 &uart4 {
 	pinctrl-names = "default";
