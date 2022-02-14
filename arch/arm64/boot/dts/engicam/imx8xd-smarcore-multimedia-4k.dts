@@ -515,7 +515,13 @@
 };
 
 &pcieb{
-	status = "disabled";
+	ext_osc = <1>;
+	compatible = "fsl,imx8qxp-pcie","snps,dw-pcie";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pcieb>;
+	pinctrl-assert-gpios = <&lsio_gpio4 1 GPIO_ACTIVE_HIGH>;
+	reset-gpio = <&lsio_gpio4 0 GPIO_ACTIVE_LOW>;
+	status = "okay";
 };
 
 &rpmsg{
@@ -952,7 +958,15 @@
 			IMX8QXP_USDHC1_VSELECT_CONN_USDHC1_VSELECT		0x00000021
 		>;
 	};
-	
+
+	pinctrl_pcieb: pcieagrp {
+		fsl,pins = <
+			IMX8QXP_PCIE_CTRL0_PERST_B_LSIO_GPIO4_IO00		0x06000021
+			IMX8QXP_PCIE_CTRL0_CLKREQ_B_LSIO_GPIO4_IO01	0x06000021
+			IMX8QXP_PCIE_CTRL0_WAKE_B_LSIO_GPIO4_IO02		0x06000021
+		>;
+	};
+
 	pinctrl_i2c_mipi_csi0: i2c_mipi_csi0 {
 		fsl,pins = <
 			IMX8QXP_MIPI_CSI0_I2C0_SCL_MIPI_CSI0_I2C0_SCL		0xc2000020

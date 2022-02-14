@@ -515,7 +515,13 @@
 };
 
 &pcieb{
-	status = "disabled";
+	ext_osc = <1>;
+	compatible = "fsl,imx8qxp-pcie","snps,dw-pcie";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pcieb>;
+	pinctrl-assert-gpios = <&lsio_gpio4 1 GPIO_ACTIVE_HIGH>;
+	reset-gpio = <&lsio_gpio4 0 GPIO_ACTIVE_LOW>;
+	status = "okay";
 };
 
 &rpmsg{
