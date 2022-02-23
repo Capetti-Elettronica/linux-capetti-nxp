@@ -12,7 +12,7 @@
 
 / {
 	model = "Engicam i.Core i.MX8MPlus Multimedia 4K board";
-	compatible = "engi,smarcore-imx8mp", "fsl,imx8mp";
+	compatible = "engi,smarcore-imx8mp","fsl,imx8mp-evk", "fsl,imx8mp";
 
 	reserved-memory {
 		#address-cells = <2>;
@@ -28,11 +28,11 @@
 	chosen {
 		stdout-path = &uart2;
 	};
-	
+
 	gpio_export {
 		compatible = "gpio-export";
 		#size-cells = <0>;
-		
+
 		USB_HUB_RESETn {
 			gpio-export,name = "usb_hub_resetn";
 			gpio-export,output = <0>;
@@ -71,7 +71,7 @@
 			gpio-export,name = "lcd_vdd_en";
 			gpio-export,output = <1>;
 			gpios = <&gpio4 1 1>;
-		};		
+		};
 	};
 
 	reg_usdhc2_vmmc: regulator-usdhc2 {
@@ -103,7 +103,6 @@
 	};
 
 	reg_3v3_sgtl: reg_3v3_sgtl_regulator {
-		
 		compatible = "regulator-fixed";
 		regulator-name = "3v3_sgtl";
 		regulator-min-microvolt = <3300000>;
@@ -297,7 +296,7 @@
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy0>;
 	status = "okay";
-	
+
 	snps,reset-gpio = <&gpio4 28 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 
@@ -467,7 +466,7 @@
 			reg = <0x0a>;
 			clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_SAI3_MCLK1>;
 			clock-names = "mclk";
-			assigned-clock-rates = <12000000>, <12000000>;                
+			assigned-clock-rates = <12000000>, <12000000>;
 			VDDA-supply = <&reg_3v3_avdd_sgtl>;
 			VDDIO-supply = <&reg_3v3_sgtl>;
 			VDDD-supply = <&reg_1v8_sgtl>;
@@ -479,8 +478,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
-	
-	
+
 	ov5640_1: ov5640_mipi@3c {
 		compatible = "ovti,ov5640";
 		reg = <0x3c>;
@@ -614,7 +612,7 @@
 	status = "okay";
 };
 
-&pcie {    
+&pcie {
 	status = "disabled";
 };
 
@@ -652,7 +650,7 @@
 	status = "okay";
 };
 
-&uart2 {/* console */
+&uart2 { /* console */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
 	status = "okay";
@@ -713,9 +711,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>;
 	bus-width = <4>;
-	// mo-1-8-v; TO BE TESTED
-	//pm-ignore-notify; TO BE TESTED
-	//keep-power-in-suspend; TO BE TESTED
 	vmmc-supply = <&wl_reg_on>;
 	non-removable;
 	status = "okay";
@@ -723,6 +718,11 @@
 	mwifiex: wifi@1 {
 		compatible = "marvell,sd8897";
 		reg = <1>;
+	};
+	
+	btmrvl: bluetooth@2 {
+		compatible = "marvell,sd8897-bt";
+		reg = <2>;
 	};
 
 };
@@ -735,7 +735,7 @@
 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
 	vmmc-supply = <&reg_usdhc2_vmmc>;
-	no-1-8-v;	
+	no-1-8-v;
 	bus-width = <4>;
 	status = "okay";
 };
@@ -893,7 +893,7 @@
 #endif
 		>;
 	};
-	
+
 	pinctrl_ecspi2: ecspi2grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_ECSPI2_SCLK__ECSPI2_SCLK		0x82
@@ -907,7 +907,7 @@
 			MX8MP_IOMUXC_ECSPI2_SS0__GPIO5_IO13		0x40000
 		>;
 	};
-	
+
 	pinctrl_eqos: eqosgrp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO06__ENET_QOS_MDC	0x3
@@ -927,7 +927,7 @@
 			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28	0x19
 		>;
 	};
-	
+
 	pinctrl_fec: fecgrp {
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI1_RXD2__ENET1_MDC		0x3
@@ -947,11 +947,11 @@
 			MX8MP_IOMUXC_SAI2_RXD0__GPIO4_IO23		0x19
 		>;
 	};
-	
+
 	pinctrl_flexcan1: flexcan1grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SPDIF_RX__CAN1_RX          0x154
-			MX8MP_IOMUXC_SPDIF_TX__CAN1_TX          0x154
+			MX8MP_IOMUXC_SPDIF_RX__CAN1_RX         0x154
+			MX8MP_IOMUXC_SPDIF_TX__CAN1_TX         0x154
 		>;
 	};
 
@@ -989,7 +989,7 @@
 			MX8MP_IOMUXC_SAI5_MCLK__I2C5_SDA			0x400001c3
 		>;
 	};
-	
+
 	edt_ft5x06_pins: edt-ft5x06-pins-grp{
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI1_RXD7__GPIO4_IO09	0x41	/* INT */
@@ -1042,7 +1042,7 @@
 			MX8MP_IOMUXC_SD1_DATA7__UART3_DCE_RX		0x140
 		>;
 	};
-	
+
 	pinctrl_uart4: uart4grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_UART4_RXD__UART4_DCE_RX		0x140
@@ -1166,7 +1166,7 @@
 			MX8MP_IOMUXC_GPIO1_IO07__GPIO1_IO07	0x19
 		>;
 	};
-	
+
 	pinctrl_csi1_pwn: csi1_pwn_grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO00__GPIO1_IO00		0x19
