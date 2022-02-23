@@ -748,6 +748,11 @@
 		compatible = "marvell,sd8897";
 		reg = <1>;
 	};
+			
+	btmrvl: bluetooth@2 {
+		compatible = "marvell,sd8897-bt";
+		reg = <2>;
+	};
 };
 
 /* SDCARD */
