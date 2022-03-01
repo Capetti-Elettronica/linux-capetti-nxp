@@ -644,7 +644,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_laird>;
 	bus-width = <4>;
-	mo-1-8-v;
+	no-1-8-v;
+	max-frequency = <15000000>;
 	pm-ignore-notify;
 	keep-power-in-suspend;
 	vmmc-supply = <&wl_reg_on>;
@@ -736,9 +737,9 @@
 	pinctrl_pwm4: pwm4grp {
 		fsl,pins = <
 #ifdef SGTL_MCLK_ON_PWM4
-			MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT	0x116
+			MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT	0x110
 #else
-			MX8MP_IOMUXC_SAI5_RXFS__PWM4_OUT	0x116
+			MX8MP_IOMUXC_SAI5_RXFS__PWM4_OUT	0x110
 #endif
 		>;
 	};
