@@ -6,6 +6,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8mp-icore-ctouch2-yes10.dtb \
 			  imx8mp-smarcore.dtb \
 			  imx8mp-smarcore-pcie.dtb \
+			  imx8mp-smarcore-xtouch2.dtb \
 			  imx8mp-icore-2e.dtb \
 			  imx8mp-icore-2e-net-phy.dtb \
 			  imx8mm-icore.dtb \
@@ -22,4 +23,6 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore.dtb \
 			  imx8xq-icore-ctouch2.dtb \
 			  imx8xq-icore-ctouch2-yes7.dtb \
 			  imx8xd-smarcore-multimedia-4k.dtb \
-			  imx8xq-smarcore-multimedia-4k.dtb
+			  imx8xd-smarcore-xtouch2.dtb \
+			  imx8xq-smarcore-multimedia-4k.dtb \
+			  imx8xq-smarcore-xtouch2.dtb
