@@ -508,6 +508,7 @@
 &tsc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_tsc>;
+	compatible = "fsl,imx6ul-tsc-eng-locores";
 	status = "okay";
 	xnur-gpio = <&gpio1 3 0>;
 	measure_delay_time = <0x1ffff>;

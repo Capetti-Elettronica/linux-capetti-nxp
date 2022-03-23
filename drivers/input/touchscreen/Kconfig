@@ -643,6 +643,18 @@ config TOUCHSCREEN_IMX6UL_TSC
 	  To compile this driver as a module, choose M here: the
 	  module will be called imx6ul_tsc.
 
+config TOUCHSCREEN_IMX6UL_TSC_ENGICAM_LOCO_RES
+	tristate "Freescale i.MX6UL touchscreen controller kernel 4.1.43"
+	depends on (OF && GPIOLIB) || COMPILE_TEST
+	help
+	  Say Y here if you have a Engicam SOM with i.MX6UL, and want to
+	  use the internal touchscreen controller for loco 7 resistive kit.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called imx6ul_tsc_eng_locores.
+
 config TOUCHSCREEN_INEXIO
 	tristate "iNexio serial touchscreens"
 	select SERIO
