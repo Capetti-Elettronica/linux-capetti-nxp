@@ -10,7 +10,7 @@
 
 / {
 
-	model = "Engicam Smarcore MX8DXP Multimedia 4K (456B), display XTouch";
+	model = "Engicam Smarcore MX8DXP Multimedia 4K (456B), display AMP-10";
 	compatible = "fsl,imx8qxp";
 	
 	chosen {

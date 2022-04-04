@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2017-2020 NXP
+ */
+
+/dts-v1/;
+
+#include "imx8xd-smarcore-multimedia-4k.dts"
+
+
+/ {
+	model = "Engicam Smarcore MX8DXP Multimedia 4K (456B), display Yes-10";
+
+    lvds0_panel {
+        compatible = "panel-lvds";
+        width-mm = <210>;
+        height-mm = <158>;
+        data-mapping = "vesa-24";
+        status = "okay";
+
+        panel-timing {
+            clock-frequency = <60000000>;
+            hactive = <1024>;
+            vactive = <600>;
+            hback-porch = <60>;
+            hfront-porch = <50>;
+            vback-porch = <2>;
+            vfront-porch = <3>;
+            hsync-len = <20>;
+            vsync-len = <1>;
+        };
+
+        port {
+            panel_lvds0_in: endpoint {
+                remote-endpoint = <&lvds0_out>;
+            };
+        };
+	};
+};
