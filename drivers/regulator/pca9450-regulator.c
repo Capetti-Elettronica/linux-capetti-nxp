@@ -747,7 +747,7 @@ static int pca9450_probe(struct platform_device *pdev)
 
 
 	/* setting WDOG_B behaviours */
-	ret = pca9450_reg_write(pca9450, PCA9450_RESET_CTRL, 0x40);
+	ret = pca9450_reg_write(pca9450, PCA9450_RESET_CTRL, 0x60);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "Write 'PCA9450_RESET_CTRL': failed!\n");
 		ret = -EIO;
