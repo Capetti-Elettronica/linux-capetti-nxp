@@ -811,7 +811,7 @@ static int pca9450_i2c_probe(struct i2c_client *i2c,
 
 
 	/* setting WDOG_B behaviours */
-	ret = regmap_write(pca9450->regmap, PCA9450_REG_RESET_CTRL, 0x40);
+	ret = regmap_write(pca9450->regmap, PCA9450_REG_RESET_CTRL, 0x60);
 	if (ret < 0) {
 		dev_err(&i2c->dev, "Write 'PCA9450_REG_RESET_CTRL': failed!\n");
 		return ret;
