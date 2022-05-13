@@ -315,6 +315,10 @@ static int goodix_ts_read_input_report(struct goodix_ts_data *ts, u8 *data)
 		}
 
 		if (data[0] & GOODIX_BUFFER_STATUS_READY) {
+			if (!(data[0] & 0x80))
+			{
+				return -EAGAIN;
+			}      
 			touch_num = data[0] & 0x0f;
 			if (touch_num > ts->max_touch_num)
 				return -EPROTO;
@@ -438,7 +442,7 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 
 	if (goodix_i2c_write_u8(ts->client, GOODIX_READ_COOR_ADDR, 0) < 0)
 		dev_err(&ts->client->dev, "I2C write end_cmd error\n");
-
+	msleep(2);
 	return IRQ_HANDLED;
 }
 
@@ -909,7 +913,7 @@ retry_get_irq_gpio:
 			ts->irq_pin_access_method = IRQ_PIN_ACCESS_NONE;
 		break;
 	default:
-		if (ts->gpiod_int && ts->gpiod_rst) {
+		if (ts->gpiod_rst) {
 			ts->reset_controller_at_probe = true;
 			ts->load_cfg_from_disk = false;
 			ts->irq_pin_access_method = IRQ_PIN_ACCESS_GPIO;
@@ -1109,7 +1113,7 @@ static int goodix_configure_dev(struct goodix_ts_data *ts)
 	if (device_property_read_bool(ts->input_dev->dev.parent, "edge-failling-trigger"))
 		ts->int_trigger_type = GOODIX_INT_TRIGGER;
 
-	ts->irq_flags = goodix_irq_flags[ts->int_trigger_type] | IRQF_ONESHOT;
+	ts->irq_flags = goodix_irq_flags[ts->int_trigger_type] | IRQF_ONESHOT | IRQ_TYPE_EDGE_RISING;
 	error = goodix_request_irq(ts);
 	if (error) {
 		dev_err(&ts->client->dev, "request IRQ failed: %d\n", error);
@@ -1241,9 +1245,7 @@ reset:
 		if (!ts->cfg_name)
 			return -ENOMEM;
 
-		error = request_firmware_nowait(THIS_MODULE, true, ts->cfg_name,
-						&client->dev, GFP_KERNEL, ts,
-						goodix_config_cb);
+    goodix_config_cb(NULL,ts);
 		if (error) {
 			dev_err(&client->dev,
 				"Failed to invoke firmware loader: %d\n",

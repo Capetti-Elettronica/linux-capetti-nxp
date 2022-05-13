@@ -583,8 +583,13 @@ static void option_instat_callback(struct urb *urb);
 /* Device needs ZLP */
 #define ZLP		BIT(17)
 
+/*SIMCOM */
+
+#define SIMCOM_SIM7600_VID 0x1E0E
+#define SIMCOM_SIM7600_PID 0x9001
 
 static const struct usb_device_id option_ids[] = {
+  { USB_DEVICE(SIMCOM_SIM7600_VID, SIMCOM_SIM7600_PID)}, /*SIM7600 */
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_COLT) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA_LIGHT) },
@@ -2155,6 +2160,13 @@ static int option_probe(struct usb_serial *serial,
 				&serial->interface->cur_altsetting->desc;
 	unsigned long device_flags = id->driver_info;
 
+	/* sim7600 */
+	if (serial->dev->descriptor.idVendor == SIMCOM_SIM7600_VID &&
+	serial->dev->descriptor.idProduct == SIMCOM_SIM7600_PID &&
+	serial->interface->cur_altsetting->desc.bInterfaceNumber == 5 )
+	return -ENODEV;
+
+  
 	/* Never bind to the CD-Rom emulation interface	*/
 	if (iface_desc->bInterfaceClass == USB_CLASS_MASS_STORAGE)
 		return -ENODEV;
