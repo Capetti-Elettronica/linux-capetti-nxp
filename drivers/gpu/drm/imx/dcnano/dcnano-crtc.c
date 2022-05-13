@@ -50,7 +50,7 @@ static void dcnano_crtc_mode_set_nofb_dpi(struct drm_crtc *crtc)
 	dcnano_write(dcnano, DCNANO_DBICONFIG, DBICFG_BUS_OUTPUT_SEL_DPI);
 
 	/* set bus format */
-	dcnano_write(dcnano, DCNANO_DPICONFIG, DPICFG_DATA_FORMAT_D24);
+	dcnano_write(dcnano, DCNANO_DPICONFIG, DPICFG_DATA_FORMAT_D18CFG1);
 
 	/* horizontal timing */
 	val = HDISPLAY_END(adj->crtc_hdisplay) |

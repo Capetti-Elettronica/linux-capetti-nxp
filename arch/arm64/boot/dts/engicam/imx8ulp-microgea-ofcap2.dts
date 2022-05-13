@@ -17,6 +17,32 @@
 		stdout-path = &lpuart5;
 	};
 
+	panel_lvds: panel-lvds {
+		compatible = "panel-lvds";
+		width-mm = <152>;
+		height-mm = <92>;
+		data-mapping = "vesa-24";
+		status = "okay";
+
+		panel-timing {
+			clock-frequency = <33000000>;
+			hactive = <800>;
+			vactive = <480>;
+			hsync-len = <8>;
+			hfront-porch = <156>;
+			hback-porch = <156>;
+			vfront-porch = <16>;
+			vback-porch = <16>;
+			vsync-len = <6>;
+		};
+
+		port {
+			panel_in_rgb: endpoint {
+				remote-endpoint = <&dcnano_out_lcd>;
+			};
+		};
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
@@ -193,15 +219,31 @@
 };
 
 &dcnano {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcd>;
 	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			dcnano_out_lcd: endpoint@1 {
+				remote-endpoint = <&panel_in_rgb>;
+			};
+		};
+	};
 };
 
 &dphy {
-	status = "okay";
+	status = "disabled";
 };
 
 &dsi {
-	status = "okay";
+	status = "disabled";
 	ports {
 		port@1 {
 			reg = <1>;
@@ -228,7 +270,7 @@
 	assigned-clock-parents = <&clock_ext_ts>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy>;
-	status = "okay";
+	status = "disabled";
 
 	mdio {
 		#address-cells = <1>;
@@ -245,7 +287,7 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_flexspi2_ptd>;
 	pinctrl-1 = <&pinctrl_flexspi2_ptd>;
-	status = "okay";
+	status = "disabled";
 
 	mx25uw51345gxdi00: flash@0 {
 		reg = <0>;
@@ -347,7 +389,7 @@
 	pinctrl-1 = <&pinctrl_lpspi5>;
 	cs-gpios = <&gpiof 19 GPIO_ACTIVE_LOW>;
 	pinctrl-assert-gpios = <&pca6416_1 10 GPIO_ACTIVE_LOW>;
-	status = "okay";
+	status = "disabled";
 
 	spidev0: spi@0 {
 		reg = <0>;
@@ -377,7 +419,7 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_lpuart7>;
 	pinctrl-1 = <&pinctrl_lpuart7>;
-	status = "okay";
+	status = "disabled";
 };
 
 &lpi2c7 {
@@ -413,7 +455,7 @@
 	assigned-clocks = <&cgc1 IMX8ULP_CLK_SAI5_SEL>;
 	assigned-clock-parents = <&cgc1 IMX8ULP_CLK_SPLL3_PFD1_DIV1>;
 	fsl,dataline = <0 0x08 0x01>;
-	status = "okay";
+	status = "disabled";
 };
 
 &spdif {
@@ -450,9 +492,6 @@
 };
 
 &usbotg2 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_otgid2>;
-	pinctrl-1 = <&pinctrl_otgid2>;
 	dr_mode = "otg";
 	hnp-disable;
 	srp-disable;
@@ -493,7 +532,7 @@
 	non-removable;
 	wakeup-source;
 	fsl,sdio-async-interrupt-enabled;
-	status = "okay";
+	status = "diasbled";
 
 	wifi_wake_host {
 		compatible = "nxp,wifi-wake-host";
@@ -504,6 +543,40 @@
 };
 
 &iomuxc1 {
+	pinctrl_lcd: lcdgrp {
+		fsl,pins = <
+			MX8ULP_PAD_PTF23__DPI0_D0   	0x43
+			MX8ULP_PAD_PTF22__DPI0_D1   	0x43
+			MX8ULP_PAD_PTF21__DPI0_D2   	0x43
+			MX8ULP_PAD_PTF20__DPI0_D3  		0x43
+			MX8ULP_PAD_PTF19__DPI0_D4		0x43
+			MX8ULP_PAD_PTF18__DPI0_D5   	0x43
+			MX8ULP_PAD_PTD11__DPI0_D6		0x43
+			MX8ULP_PAD_PTF16__DPI0_D7		0x43
+			MX8ULP_PAD_PTF15__DPI0_D8		0x43
+			MX8ULP_PAD_PTF14__DPI0_D9		0x43
+			MX8ULP_PAD_PTF13__DPI0_D10		0x43
+			MX8ULP_PAD_PTF12__DPI0_D11		0x43
+			MX8ULP_PAD_PTF11__DPI0_D12		0x43
+			MX8ULP_PAD_PTF10__DPI0_D13		0x43
+			MX8ULP_PAD_PTD19__DPI0_D14		0x43
+			MX8ULP_PAD_PTD20__DPI0_D15		0x43
+			MX8ULP_PAD_PTD21__DPI0_D16		0x43
+			MX8ULP_PAD_PTD22__DPI0_D17		0x43
+			MX8ULP_PAD_PTD23__DPI0_D18		0x43
+			MX8ULP_PAD_PTE0__DPI0_D19		0x43
+			MX8ULP_PAD_PTE1__DPI0_D20		0x43
+			MX8ULP_PAD_PTE2__DPI0_D21		0x43
+			MX8ULP_PAD_PTE3__DPI0_D22		0x43
+			MX8ULP_PAD_PTE4__DPI0_D23		0x43
+			MX8ULP_PAD_PTF26__DPI0_HSYNC	0x43
+			MX8ULP_PAD_PTF25__DPI0_VSYNC	0x43
+			MX8ULP_PAD_PTF24__DPI0_PCLK		0x43
+			MX8ULP_PAD_PTF27__DPI0_DE		0x43
+
+		>;
+	};
+
 	pinctrl_dsi: dsigrp {
 		fsl,pins = <
 			MX8ULP_PAD_PTF8__PTF8		0x3
