@@ -445,7 +445,7 @@
 		mclk = <24000000>;
 		mclk_source = <0>;
 		mipi_csi;
-		status = "disabled";
+		status = "okay";
 
 		port {
 			ov5640_mipi_0_ep: endpoint {
@@ -505,23 +505,24 @@
 };
 
 &irqsteer_hdmi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmi_blk_ctrl {
-	status = "disabled";
+	status = "okay";
 };
 
+// Se abilitato crasha
 &hdmi_pavi {
 	status = "disabled";
 };
 
 &hdmi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmiphy {
-	status = "disabled";
+	status = "okay";
 };
 
 &lcdif1 {
@@ -559,7 +560,7 @@
 };
 
 &mipi_dsi {
-	status = "disabled";
+	status = "okay";
 };
 
 &snvs_pwrkey {
@@ -981,7 +982,7 @@
 &mipi_csi_0 {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	status = "disabled";
+	status = "okay";
 
 	port@0 {
 		reg = <0>;
