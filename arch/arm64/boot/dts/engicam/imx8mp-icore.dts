@@ -22,7 +22,7 @@
 		      <0x1 0x00000000 0 0xc0000000>;
 	};
 
-reg_usb1_host_vbus: regulator-usb1-vbus {
+	reg_usb1_host_vbus: regulator-usb1-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "usb1_host_vbus";
 		pinctrl-names = "default";
@@ -100,7 +100,7 @@ reg_usb1_host_vbus: regulator-usb1-vbus {
 				<48000>,
 				<96000>,
 				<192000>;
-		status = "okay";
+		status = "disabled";
 	};
 
 	sound {
@@ -505,23 +505,23 @@ reg_usb1_host_vbus: regulator-usb1-vbus {
 };
 
 &irqsteer_hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_blk_ctrl {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_pavi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmiphy {
-	status = "okay";
+	status = "disabled";
 };
 
 &lcdif1 {
@@ -534,9 +534,6 @@ reg_usb1_host_vbus: regulator-usb1-vbus {
 
 &lcdif3 {
 	status = "okay";
-
-	thres-low  = <1 2>;             /* (FIFO * 1 / 2) */
-	thres-high = <3 4>;             /* (FIFO * 3 / 4) */
 };
 
 &ldb {
@@ -666,7 +663,7 @@ reg_usb1_host_vbus: regulator-usb1-vbus {
 	keep-power-in-suspend;
 	vmmc-supply = <&wl_reg_on>;
 	non-removable;
-	status = "disabled";
+	status = "okay";
 
 	brcmf: bcrmf@1 {
 		reg = <1>;
