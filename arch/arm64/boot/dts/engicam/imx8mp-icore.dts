@@ -112,7 +112,7 @@
 				<48000>,
 				<96000>,
 				<192000>;
-		status = "okay";
+		status = "disabled";
 	};
 
 	sound {
@@ -448,7 +448,7 @@
 };
 
 &irqsteer_hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &flexcan1 {
@@ -463,28 +463,24 @@
 	status = "okay";
 };
 
-&irqsteer_hdmi {
-	status = "okay";
-};
-
 &hdmi_blk_ctrl {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_pavi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmiphy {
-	status = "okay";
+	status = "disabled";
 };
 
 &lcdif1 {
-	status = "okay";
+	status = "disabled";
 };
 
 &lcdif2 {
@@ -492,7 +488,13 @@
 };
 
 &lcdif3 {
-	status = "okay";
+	status = "disabled";
+};
+
+&a53_opp_table {
+
+	/delete-node/ opp-1800000000;
+	/delete-node/ opp-1600000000;
 };
 
 &ldb {
@@ -1030,3 +1032,4 @@
 		>;
 	};
 };
+&gpu_3d
