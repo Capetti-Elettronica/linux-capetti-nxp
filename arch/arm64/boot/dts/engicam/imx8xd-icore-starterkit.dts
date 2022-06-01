@@ -149,16 +149,6 @@
 		};
 	};
 
-	reg_usdhc2_vmmc: usdhc2-vmmc {
-		compatible = "regulator-fixed";
-		regulator-name = "SD1_SPWR";
-		regulator-min-microvolt = <3000000>;
-		regulator-max-microvolt = <3000000>;
-		gpio = <&lsio_gpio4 19 GPIO_ACTIVE_HIGH>;
-		off-on-delay-us = <3480>;
-		enable-active-high;
-	};
-
 	reg_can_en: regulator-can-en {
 		compatible = "regulator-fixed";
 		regulator-name = "can-en";
@@ -1063,14 +1053,12 @@
 &usdhc2 {
 	assigned-clocks = <&clk IMX_SC_R_SDHC_1 IMX_SC_PM_CLK_PER>;
 	assigned-clock-rates = <200000000>;
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
-	pinctrl-1 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
-	pinctrl-2 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	bus-width = <4>;
-	vmmc-supply = <&reg_usdhc2_vmmc>;
+	max-frequency = <50000000>;
+	no-1-8-v;
 	cd-gpios = <&lsio_gpio4 22 GPIO_ACTIVE_LOW>;
-	wp-gpios = <&lsio_gpio4 21 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
 
@@ -1484,8 +1472,6 @@
 
 	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
 		fsl,pins = <
-			IMX8QXP_USDHC1_RESET_B_LSIO_GPIO4_IO19     0x00000021
-			IMX8QXP_USDHC1_WP_LSIO_GPIO4_IO21          0x00000021
 			IMX8QXP_USDHC1_CD_B_LSIO_GPIO4_IO22        0x00000021
 		>;
 	};
@@ -1499,7 +1485,6 @@
 			IMX8QXP_USDHC1_DATA1_CONN_USDHC1_DATA1			0x00000021
 			IMX8QXP_USDHC1_DATA2_CONN_USDHC1_DATA2			0x00000021
 			IMX8QXP_USDHC1_DATA3_CONN_USDHC1_DATA3			0x00000021
-			IMX8QXP_USDHC1_VSELECT_CONN_USDHC1_VSELECT		0x00000021
 		>;
 	};
 
