@@ -313,6 +313,33 @@
 		};
 	};
 
+
+	panel_lvds: panel-lvds {
+		compatible = "panel-lvds";
+
+		width-mm = <210>;
+		height-mm = <158>;
+		data-mapping = "vesa-24";
+		status = "okay";
+
+		panel-timing {
+			clock-frequency = <52000000>;
+			hactive = <1024>;
+			vactive = <600>;
+			hsync-len = <150>;
+			hfront-porch = <20>;
+			hback-porch = <150>;
+			vfront-porch = <10>;
+			vback-porch = <10>;
+			vsync-len = <15>;
+		};
+
+		port {
+			panel_in_lvds: endpoint {
+				remote-endpoint = <&lvds0_out>;
+			};
+		};
+	};
 };
 
 &cm40_i2c {
@@ -486,11 +513,11 @@
 		reg = <0x4c>;
 		reset-gpios = <&pca9557_a 6 GPIO_ACTIVE_LOW>;
 
-		port {
+		/*port {
 			it6263_0_in: endpoint {
 				remote-endpoint = <&lvds0_out>;
 			};
-		};
+		};*/
 	};
 
 	adv_bridge0: adv7535@3d {
@@ -523,7 +550,7 @@
 	status = "okay";
 
 	lvds-channel@0 {
-		fsl,data-mapping = "jeida";
+		fsl,data-mapping = "spwg";
 		fsl,data-width = <24>;
 		status = "okay";
 
@@ -531,7 +558,7 @@
 			reg = <1>;
 
 			lvds0_out: endpoint {
-				remote-endpoint = <&it6263_0_in>;
+				remote-endpoint = <&panel_in_lvds>;
 			};
 		};
 	};
@@ -557,7 +584,7 @@
 &pwm_mipi_lvds1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_mipi_lvds1>;
-	status = "okay";
+	status = "disabled";
 };
 
 &i2c0_mipi_lvds1 {
@@ -566,7 +593,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c0_mipi_lvds1>;
 	clock-frequency = <100000>;
-	status = "okay";
+	status = "disabled";
 
 	lvds_bridge1: lvds-to-hdmi-bridge@4c {
 		compatible = "ite,it6263";
@@ -591,7 +618,7 @@
 		adi,dsi-channel = <1>;
 		interrupt-parent = <&lsio_gpio2>;
 		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-		status = "okay";
+		status = "disabled";
 
 		port@0 {
 			reg = <0>;
@@ -603,16 +630,16 @@
 };
 
 &ldb2_phy {
-	status = "okay";
+	status = "disabled";
 };
 
 &ldb2 {
-	status = "okay";
+	status = "disabled";
 
 	lvds-channel@0 {
 		fsl,data-mapping = "jeida";
 		fsl,data-width = <24>;
-		status = "okay";
+		status = "disabled";
 
 		port@1 {
 			reg = <1>;
@@ -625,11 +652,11 @@
 };
 
 &mipi1_dphy {
-	status = "okay";
+	status = "disabled";
 };
 
 &mipi1_dsi_host {
-	status = "okay";
+	status = "disabled";
 
 	ports {
 		port@1 {
@@ -704,7 +731,7 @@
 	assigned-clock-rates = <786432000>, <49152000>, <12288000>, <49152000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai1>;
-	status = "okay";
+	status = "disabled";
 };
 
 &sai4 {
@@ -794,7 +821,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexspi0>;
 	nxp,fspi-dll-slvdly = <4>;
-	status = "okay";
+	status = "disabled";
 
 	flash0: mt35xu512aba@0 {
 		reg = <0>;
@@ -814,6 +841,16 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpi2c1 &pinctrl_ioexp_rst>;
 	status = "okay";
+
+	polytouch: edt-ft5x26@38 {
+		compatible = "edt,edt-ft5x26";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_touch1>;
+		interrupt-parent = <&lsio_gpio3>;
+		interrupts = <10 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios= <&lsio_gpio1 7 GPIO_ACTIVE_LOW>;
+	};
 
 	i2c-switch@71 {
 		compatible = "nxp,pca9646", "nxp,pca9546";
@@ -1235,6 +1272,13 @@
 		fsl,pins = <
 			IMX8QXP_MCLK_OUT0_ADMA_ACM_MCLK_OUT0       0x0600004c
 			IMX8QXP_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD  0x000514a0
+		>;
+	};
+
+	pinctrl_touch1: touch1_intgrp {
+		fsl,pins = <
+			IMX8QXP_QSPI0A_DATA1_LSIO_GPIO3_IO10	0x06000020
+			IMX8QXP_SPI0_CS1_LSIO_GPIO1_IO07	0x06000020
 		>;
 	};
 
