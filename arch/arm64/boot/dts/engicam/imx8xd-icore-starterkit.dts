@@ -10,6 +10,10 @@
 	model = "Engicam MX8XD i.CORE";
 	compatible = "fsl,imx8dx-mek", "fsl,imx8dx", "fsl,imx8qxp";
 
+	aliases {
+		rtc1 = &rtc;
+	};
+
 	chosen {
 		stdout-path = &lpuart0;
 	};
@@ -611,6 +615,11 @@
 				clock-lanes = <0>;
 			};
 		};
+	};
+
+	pcf8523: rtc@68 {
+		compatible = "nxp,pcf8523";
+		reg = <0x68>;
 	};
 
 	i2c-switch@71 {
