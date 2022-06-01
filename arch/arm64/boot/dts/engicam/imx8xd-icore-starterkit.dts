@@ -681,7 +681,7 @@
 	assigned-clock-parents = <&aud_pll_div0_lpcg 0>;
 	assigned-clock-rates = <0>, <786432000>, <49152000>, <12288000>, <49152000>;
 	fsl,txm-rxs;
-	status = "okay";
+	status = "disabled";
 };
 
 &sai0 {
@@ -740,6 +740,7 @@
 	phy-handle = <&ethphy0>;
 	fsl,magic-packet;
 	nvmem-cells = <&fec_mac0>;
+	reset-gpio = <&lsio_gpio3 4 GPIO_ACTIVE_LOW>;
 	nvmem-cell-names = "mac-address";
 	rx-internal-delay-ps = <2000>;
 	status = "okay";
@@ -748,11 +749,12 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		ethphy0: ethernet-phy@0 {
+		ethphy0: ethernet-phy@7 {
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <0>;
+			reg = <7>;
 			qca,disable-smarteee;
 			vddio-supply = <&vddio0>;
+			max-speed = <100>;
 
 			vddio0: vddio-regulator {
 				regulator-min-microvolt = <1800000>;
@@ -760,12 +762,12 @@
 			};
 		};
 
-		ethphy1: ethernet-phy@1 {
+		ethphy1: ethernet-phy@3 {
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <1>;
+			reg = <3>;
 			qca,disable-smarteee;
 			vddio-supply = <&vddio1>;
-			status = "disabled";
+			status = "okay";
 
 			vddio1: vddio-regulator {
 				regulator-min-microvolt = <1800000>;
@@ -780,12 +782,12 @@
 	pinctrl-0 = <&pinctrl_fec2>;
 	phy-mode = "rgmii-txid";
 	phy-handle = <&ethphy1>;
-	phy-supply = <&reg_fec2_supply>;
+	reset-gpio = <&lsio_gpio3 8 GPIO_ACTIVE_HIGH>;
 	fsl,magic-packet;
 	nvmem-cells = <&fec_mac1>;
 	nvmem-cell-names = "mac-address";
 	rx-internal-delay-ps = <2000>;
-	status = "disabled";
+	status = "okay";
 };
 
 &flexspi0 {
@@ -1202,7 +1204,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c_mipi_csi0>;
 	clock-frequency = <100000>;
-	status = "okay";
+	status = "disabled";
 
 	max9286_mipi@6a {
 		compatible = "maxim,max9286_mipi";
@@ -1215,7 +1217,7 @@
 		mclk_source = <0>;
 		pwn-gpios = <&lsio_gpio3 7 GPIO_ACTIVE_HIGH>;
 		virtual-channel;
-		status = "okay";
+		status = "disabled";
 		port {
 			max9286_0_ep: endpoint {
 				remote-endpoint = <&mipi_csi0_ep>;
@@ -1299,6 +1301,7 @@
 			IMX8QXP_ENET0_RGMII_RXD1_CONN_ENET0_RGMII_RXD1		0x06000020
 			IMX8QXP_ENET0_RGMII_RXD2_CONN_ENET0_RGMII_RXD2		0x06000020
 			IMX8QXP_ENET0_RGMII_RXD3_CONN_ENET0_RGMII_RXD3		0x06000020
+			IMX8QXP_MIPI_CSI0_MCLK_OUT_LSIO_GPIO3_IO04	0x06000020
 		>;
 	};
 
@@ -1316,6 +1319,7 @@
 			IMX8QXP_ESAI0_TX3_RX2_CONN_ENET1_RGMII_RXD1	0x00000060
 			IMX8QXP_ESAI0_TX2_RX3_CONN_ENET1_RGMII_RXD2	0x00000060
 			IMX8QXP_ESAI0_TX1_CONN_ENET1_RGMII_RXD3		0x00000060
+			IMX8QXP_MIPI_CSI0_GPIO0_00_LSIO_GPIO3_IO08	0x06000020
 		>;
 	};
 
