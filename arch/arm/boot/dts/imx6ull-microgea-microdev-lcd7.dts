@@ -31,17 +31,6 @@
       status = "okay";
     };
 
-	panel: panel {
-		compatible = "innolux,zj070na-01p";
-		backlight = <&bl>;
-	
-		port {
-			panel_in: endpoint {
-				remote-endpoint = <&lcdif_out>;
-			};
-		};
-	};
-
 	gpio-export {
 		compatible = "gpio-export";
 		#size-cells = <0>;
@@ -69,13 +58,32 @@
 &lcdif {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lcdif_dat
-		     &pinctrl_lcdif_ctrl>;
-
+			&pinctrl_lcdif_ctrl>;
+	display = <&display0>;
 	status = "okay";
 
-	port {
-		lcdif_out: endpoint {
-			remote-endpoint = <&panel_in>;
+	display0: display {
+		bits-per-pixel = <32>;
+		bus-width = <24>;
+
+		display-timings {
+			native-mode = <&timing1>;
+			timing1: hsd100pxn1 {
+				clock-frequency = <50000000>;
+				hactive = <1024>;
+				vactive = <600>;
+				hback-porch = <150>;
+				hfront-porch = <150>;
+				vback-porch = <10>;
+				vfront-porch = <10>;
+				hsync-len = <20>;
+				vsync-len = <15>;
+
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
 		};
 	};
 };
