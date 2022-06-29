@@ -511,7 +511,7 @@
 	ov5640_mipi: ov5640_mipi@3c {
 		compatible = "ovti,ov5640_mipi";
 		reg = <0x3c>;
-		status = "okay";
+		status = "disabled";
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_csi_pwn>, <&pinctrl_csi_rst>;
 		clocks = <&clk IMX8MM_CLK_CLKO1>;
@@ -593,7 +593,7 @@
 				 <&clk IMX8MM_SYS_PLL2_100M>,
 				 <&clk IMX8MM_SYS_PLL2_250M>;
 	ext_osc = <1>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie0_ep{
@@ -737,6 +737,18 @@
 			remote-endpoint = <&typec1_dr_sw>;
 		};
 	};
+};
+
+&usdhc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_usdhc1_gpio>;
+	cd-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
+	max-frequency = <50000000>;
+	bus-width = <4>;
+	keep-power-in-suspend;
+	pm-ignore-notify;
+	no-1-8-v;
+	status = "okay";
 };
 
 &usdhc2 {
@@ -1020,7 +1032,7 @@
 
 	pinctrl_usdhc1_gpio: usdhc1grpgpio {
 		fsl,pins = <
-			MX8MM_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
+			MX8MM_IOMUXC_GPIO1_IO06_GPIO1_IO6	0x41
 		>;
 	};
 
