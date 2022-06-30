@@ -332,6 +332,28 @@
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
 
+	ov5640_mipi: ov5640_mipi@3c {
+		compatible = "ovti,ov5640_mipi";
+		reg = <0x3c>;
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_csi_pwn>, <&pinctrl_csi_rst>;
+		clocks = <&clk IMX8MM_CLK_CLKO1>;
+		clock-names = "csi_mclk";
+		assigned-clocks = <&clk IMX8MM_CLK_CLKO1>;
+		assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
+		assigned-clock-rates = <24000000>;
+		csi_id = <0>;
+		pwn-gpios = <&gpio4 22 GPIO_ACTIVE_HIGH>;
+		mclk = <24000000>;
+		mclk_source = <0>;
+		port {
+			ov5640_mipi1_ep: endpoint {
+				remote-endpoint = <&mipi1_sensor_ep>;
+			};
+		};
+	};
+
 	polytouch: edt-ft5x26@38 {
 		compatible = "edt,edt-ft5x26";
 		reg = <0x38>;
@@ -361,28 +383,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
-
-	ov5640_mipi: ov5640_mipi@3c {
-		compatible = "ovti,ov5640_mipi";
-		reg = <0x3c>;
-		status = "disabled";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_csi_pwn>, <&pinctrl_csi_rst>;
-		clocks = <&clk IMX8MM_CLK_CLKO1>;
-		clock-names = "csi_mclk";
-		assigned-clocks = <&clk IMX8MM_CLK_CLKO1>;
-		assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
-		assigned-clock-rates = <24000000>;
-		csi_id = <0>;
-		pwn-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-		port {
-			ov5640_mipi1_ep: endpoint {
-				remote-endpoint = <&mipi1_sensor_ep>;
-			};
-		};
-	};
 };
 
 &i2c4 {
@@ -711,14 +711,13 @@
 
 	pinctrl_csi_pwn: csi_pwn_grp {
 		fsl,pins = <
-			MX8MM_IOMUXC_GPIO1_IO07_GPIO1_IO7		0x19
+			MX8MM_IOMUXC_SAI2_RXC_GPIO4_IO22		0x19
 		>;
 	};
 
 	pinctrl_csi_rst: csi_rst_grp {
 		fsl,pins = <
-			MX8MM_IOMUXC_GPIO1_IO06_GPIO1_IO6		0x19
-			MX8MM_IOMUXC_GPIO1_IO14_CCMSRCGPCMIX_CLKO1	0x59
+			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12		0x19
 		>;
 	};
 
