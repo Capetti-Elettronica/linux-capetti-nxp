@@ -21,6 +21,16 @@
 		reg = <0x0 0x40000000 0 0x80000000>;
 	};
 
+	backlight_lvds: backlight_lvds {
+		compatible = "pwm-backlight";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_pwm1>;
+		pwms = <&pwm1 0 1000000>;
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <7>;
+		status = "okay";
+	};
+
 	ir_recv: ir-receiver {
 		compatible = "gpio-ir-receiver";
 		gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
@@ -408,25 +418,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
-
-	adv_bridge: adv7535@3d {
-		compatible = "adi,adv7535";
-		reg = <0x3d>;
-		adi,addr-cec = <0x3b>;
-		adi,dsi-lanes = <4>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_i2c2_synaptics_dsx_io>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <9 IRQ_TYPE_LEVEL_LOW>;
-
-		status = "okay";
-
-		port {
-			adv7535_from_dsim: endpoint {
-				remote-endpoint = <&dsim_to_adv7535>;
-			};
-		};
-	};
 };
 
 &i2c3 {
@@ -503,6 +494,51 @@
 	};
 };
 
+&i2c4 {
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c4>;
+	status = "okay";
+
+	lvds_bridge: sn65dsi83@2c {
+		compatible = "ti,sn65dsi83";
+		reg = <0x2c>;
+		ti,dsi-lanes = <2>;
+		ti,lvds-format = <2>;
+		ti,lvds-bpp = <24>;
+		ti,width-mm = <149>;
+		ti,height-mm = <93>;
+		enable-gpios = <&gpio3 9  GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dsi_lvds_bridge>;
+		status = "okay";
+
+		display-timings {
+			lvds {
+				clock-frequency = <62500000>;
+				hactive = <1024>;
+				vactive = <600>;
+				hback-porch = <60>;
+				hfront-porch = <50>;
+				vback-porch = <2>;
+				vfront-porch = <3>;
+				hsync-len = <20>;
+				vsync-len = <1>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		port {
+			sn65dsi83_in: endpoint {
+				remote-endpoint = <&dsim_to_sn65dsi8>;
+			};
+		};
+	};
+};
+
 &lcdif {
        status = "okay";
 };
@@ -537,14 +573,14 @@
 };
 
 &mipi_dsi {
-       status = "okay";
+    status = "okay";
 
-       port@1 {
-               dsim_to_adv7535: endpoint {
-                       remote-endpoint = <&adv7535_from_dsim>;
+	port@1 {
+		dsim_to_sn65dsi8: endpoint {
+			remote-endpoint = <&sn65dsi83_in>;
 			attach-bridge;
-               };
-       };
+		};
+	};
 };
 
 &pcie0{
@@ -586,6 +622,10 @@
 	ext_osc = <1>;
 	l1ss-disabled;
 	status = "disabled";
+};
+
+&pwm1{
+    status = "okay";
 };
 
 &sai2 {
@@ -777,6 +817,13 @@
 		>;
 	};
 
+	pinctrl_dsi_lvds_bridge: lvds_bridge_gpio {
+		fsl,pins = <
+			MX8MM_IOMUXC_NAND_DATA03_GPIO3_IO9	0x19
+			MX8MM_IOMUXC_NAND_DATA02_GPIO3_IO8	0x19
+		>;
+	};
+
 	pinctrl_ecspi2: ecspi2grp {
 		fsl,pins = <
 			MX8MM_IOMUXC_ECSPI2_SCLK_ECSPI2_SCLK		0x82
@@ -842,16 +889,17 @@
 		>;
 	};
 
-	pinctrl_i2c2_synaptics_dsx_io: synaptics_dsx_iogrp {
-		fsl,pins = <
-			MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9               0x19    /* Touch int */
-		>;
-	};
-
 	pinctrl_i2c3: i2c3grp {
 		fsl,pins = <
 			MX8MM_IOMUXC_I2C3_SCL_I2C3_SCL			0x400001c3
 			MX8MM_IOMUXC_I2C3_SDA_I2C3_SDA			0x400001c3
+		>;
+	};
+
+	pinctrl_i2c4: i2c4grp {
+		fsl,pins = <
+			MX8MM_IOMUXC_I2C4_SCL_I2C4_SCL			0x400001c3
+			MX8MM_IOMUXC_I2C4_SDA_I2C4_SDA			0x400001c3
 		>;
 	};
 
@@ -884,6 +932,12 @@
 	pinctrl_pmic: pmicirqgrp {
 		fsl,pins = <
 			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x141
+		>;
+	};
+
+	pinctrl_pwm1: pwm1grp {
+		fsl,pins = <
+			MX8MM_IOMUXC_SPDIF_EXT_CLK_PWM1_OUT     0x19
 		>;
 	};
 
