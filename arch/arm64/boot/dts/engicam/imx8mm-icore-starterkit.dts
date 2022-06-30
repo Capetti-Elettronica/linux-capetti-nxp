@@ -418,6 +418,16 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
+
+	polytouch: edt-ft5x26@38 {
+		compatible = "edt,edt-ft5x26";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_edt_ft5x06>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios= <&gpio1 8 GPIO_ACTIVE_LOW>;
+	};
 };
 
 &i2c3 {
@@ -835,6 +845,13 @@
 	pinctrl_ecspi2_cs: ecspi2cs {
 		fsl,pins = <
 			MX8MM_IOMUXC_ECSPI2_SS0_GPIO5_IO13		0x40000
+		>;
+	};
+
+	pinctrl_edt_ft5x06: edtft5x06grp{
+		fsl,pins = <
+			MX8MM_IOMUXC_SAI5_RXFS_GPIO3_IO19		0xc6
+			MX8MM_IOMUXC_GPIO1_IO08_GPIO1_IO8		0x19
 		>;
 	};
 
