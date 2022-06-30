@@ -10,7 +10,7 @@
 
 / {
 	model = "Engicam i.Core i.MX8MPlus";
-	compatible = "engi,icore-imx8mp", "fsl,imx8mp";
+	compatible = "engi,imx8-icore", "fsl,imx8mp";
 
 	chosen {
 		stdout-path = &uart2;
