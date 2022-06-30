@@ -11,7 +11,11 @@
 / {
 	model = "Engicam i.MX8MM i.Core Starterkit";
 	compatible = "engi,imx8-icore", "fsl,imx8mm-evk", "fsl,imx8mm";
-	
+
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+
 	chosen {
 		stdout-path = &uart2;
 	};
@@ -352,6 +356,11 @@
 				remote-endpoint = <&mipi1_sensor_ep>;
 			};
 		};
+	};
+
+	pcf8523: rtc@68 {
+		compatible = "nxp,pcf8523";
+		reg = <0x68>;
 	};
 
 	polytouch: edt-ft5x26@38 {
