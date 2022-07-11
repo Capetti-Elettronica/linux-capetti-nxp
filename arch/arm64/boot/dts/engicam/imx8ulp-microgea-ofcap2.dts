@@ -368,6 +368,11 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	status = "okay";
+
+	pcf8563: rtc@51 {
+		compatible = "nxp,pcf8563";
+		reg = <0x51>;
+	};
 };
 
 &imx8ulp_cm33 {
