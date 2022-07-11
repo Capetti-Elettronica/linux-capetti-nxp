@@ -472,14 +472,7 @@
 };
 
 &usbotg1 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_otgid1>;
-	pinctrl-1 = <&pinctrl_otgid1>;
-	dr_mode = "otg";
-	hnp-disable;
-	srp-disable;
-	adp-disable;
-	over-current-active-low;
+	dr_mode = "host";
 	status = "okay";
 };
 
