@@ -512,6 +512,18 @@
 	status = "okay";
 };
 
+&usdhc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc1>;
+	cd-gpios = <&gpiod 16 GPIO_ACTIVE_LOW>;
+	max-frequency = <50000000>;
+	bus-width = <4>;
+	no-1-8-v;
+	pm-ignore-notify;
+	keep-power-in-suspend;
+	status = "okay";
+};
+
 &usdhc2 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
 	pinctrl-0 = <&pinctrl_usdhc2_pte>;
@@ -695,6 +707,18 @@
 			MX8ULP_PAD_PTD5__SDHC0_D5	0x3
 			MX8ULP_PAD_PTD4__SDHC0_D6	0x3
 			MX8ULP_PAD_PTD3__SDHC0_D7	0x3
+		>;
+	};
+
+	pinctrl_usdhc1: usdhc1grp {
+		fsl,pins = <
+			MX8ULP_PAD_PTF1__SDHC1_D0	0x43
+			MX8ULP_PAD_PTF0__SDHC1_D1	0x43
+			MX8ULP_PAD_PTF5__SDHC1_D2	0x42
+			MX8ULP_PAD_PTF4__SDHC1_D3	0x42
+			MX8ULP_PAD_PTF2__SDHC1_CLK	0x10042
+			MX8ULP_PAD_PTF3__SDHC1_CMD	0x43
+			MX8ULP_PAD_PTD16__PTD16		0x3
 		>;
 	};
 
