@@ -270,7 +270,9 @@
 	assigned-clock-parents = <&clock_ext_ts>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy>;
-	status = "disabled";
+	status = "okay";
+
+	phy-reset-gpios = <&gpioe 13 GPIO_ACTIVE_LOW>;
 
 	mdio {
 		#address-cells = <1>;
@@ -434,7 +436,7 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_lpi2c7>;
 	pinctrl-1 = <&pinctrl_lpi2c7>;
-	status = "okay";
+	status = "disabled";
 
 	pcal6408: gpio@21 {
 		compatible = "nxp,pcal9554b";
@@ -599,13 +601,13 @@
 			MX8ULP_PAD_PTE14__ENET0_MDIO    0x43
 			MX8ULP_PAD_PTE17__ENET0_RXER    0x43
 			MX8ULP_PAD_PTE18__ENET0_CRS_DV  0x43
-			MX8ULP_PAD_PTF1__ENET0_RXD0     0x43
+			MX8ULP_PAD_PTE21__ENET0_RXD0    0x43
 			MX8ULP_PAD_PTE20__ENET0_RXD1    0x43
 			MX8ULP_PAD_PTE16__ENET0_TXEN    0x43
 			MX8ULP_PAD_PTE23__ENET0_TXD0    0x43
 			MX8ULP_PAD_PTE22__ENET0_TXD1    0x43
 			MX8ULP_PAD_PTE19__ENET0_REFCLK  0x43
-			MX8ULP_PAD_PTF10__ENET0_1588_CLKIN 0x43
+			MX8ULP_PAD_PTE13__PTE13		 	0x43
 		>;
 	};
 
