@@ -415,11 +415,11 @@
 };
 
 &lpuart7 {
-	/* FT4232 PortD: need to connect J25/J26 2-3 */
+	/* RS232 */
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_lpuart7>;
 	pinctrl-1 = <&pinctrl_lpuart7>;
-	status = "disabled";
+	status = "okay";
 };
 
 &lpi2c7 {
@@ -649,8 +649,8 @@
 
 	pinctrl_lpuart7: lpuart7grp {
 		fsl,pins = <
-			MX8ULP_PAD_PTF22__LPUART7_TX	0x3
-			MX8ULP_PAD_PTF23__LPUART7_RX	0x3
+			MX8ULP_PAD_PTF6__LPUART7_TX	0x3
+			MX8ULP_PAD_PTF7__LPUART7_RX	0x3
 		>;
 	};
 
