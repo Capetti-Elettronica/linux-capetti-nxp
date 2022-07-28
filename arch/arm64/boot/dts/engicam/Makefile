@@ -2,6 +2,7 @@
 
 dtb-$(CONFIG_ARCH_MXC) += imx8ulp-microgea-ofcap2.dtb \
 			  imx8mp-icore-starterkit.dtb \
+			  imx8mp-icore-ctouch2.dtb \
 			  imx8xd-icore-starterkit.dtb \
 			  imx8xq-icore-starterkit.dtb \
 			  imx8mm-icore-starterkit.dtb \
