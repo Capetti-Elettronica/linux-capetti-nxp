@@ -105,7 +105,7 @@ static void __init imx8mm_soc_uid(void)
 	u32 offset = of_machine_is_compatible("fsl,imx8mp") ?
 		     IMX8MP_OCOTP_UID_OFFSET : 0;
 
-	if (of_machine_is_compatible("engi,smarcore-imx8mp"))
+	if (of_machine_is_compatible("engi,imx8-smarcore"))
 	{
 			//enable usb clock via CLKOUT1
 			smarcore_clk=ioremap(0x30360128, 10);
