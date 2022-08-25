@@ -24,6 +24,10 @@
 			reg = <0 0x55800000 0 0x800000>;
 		};
 	};
+	
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
 
 	chosen {
 		stdout-path = &uart2;
