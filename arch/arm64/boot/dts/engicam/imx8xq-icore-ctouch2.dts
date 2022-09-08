@@ -1,0 +1,114 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2017-2020 NXP
+ */
+/dts-v1/;
+#include "imx8xq-icore-starterkit.dts"
+#include <dt-bindings/usb/pd.h>
+
+/ {
+	model = "Engicam MX8XQ i.CORE - C.Touch 2.0";
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		GPIO_A {
+			gpio-export,name = "GPIO_A";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&lsio_gpio3 11 0>;
+		};
+
+		GPIO_B {
+			gpio-export,name = "GPIO_B";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&lsio_gpio3 12 0>;
+		};
+
+		GPIO_C {
+			gpio-export,name = "GPIO_C";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&lsio_gpio4 0 0>;
+		};
+
+		GPIO_D {
+			gpio-export,name = "GPIO_D";
+			gpio-export,output = <0>;
+			gpio-export,direction_may_change;
+			gpios = <&lsio_gpio4 2 0>;
+		};
+	};
+
+	panel_lvds: panel-lvds {
+		status = "disabled";
+	};
+};
+
+&pwm_mipi_lvds0 {
+	status = "disabled";
+};
+
+&i2c0_mipi_lvds0 {
+	status = "disabled";
+};
+
+&ldb1_phy {
+	status = "disabled";
+};
+
+&ldb1 {
+	status = "disabled";
+};
+
+&mipi0_dphy {
+	status = "disabled";
+};
+
+&mipi0_dsi_host {
+	status = "disabled";
+};
+
+&i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pcf8563: rtc@51 {
+		compatible = "nxp,pcf8563";
+		reg = <0x51>;
+	};
+};
+
+&usbotg3_cdns3 {
+	dr_mode = "peripheral";
+};
+
+&flexcan1 {
+	status = "disabled";
+};
+
+&mipi_csi_0 {
+	status = "disabled";
+};
+
+&cameradev {
+	status = "disabled";
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>;
+
+	pinctrl_hog: hoggrp {
+		fsl,pins = <
+			IMX8QXP_MCLK_OUT0_ADMA_ACM_MCLK_OUT0       0x0600004c
+			IMX8QXP_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD  0x000514a0
+		    IMX8QXP_QSPI0A_DATA2_LSIO_GPIO3_IO11 0x06000020 // GPIO_A
+      		IMX8QXP_QSPI0A_DATA3_LSIO_GPIO3_IO12 0x06000020 // GPIO_B
+      		IMX8QXP_PCIE_CTRL0_PERST_B_LSIO_GPIO4_IO00 0x06000020 // GPIO_C
+      		IMX8QXP_PCIE_CTRL0_WAKE_B_LSIO_GPIO4_IO02 0x06000020 // GPIO_D
+		>;
+	};
+};

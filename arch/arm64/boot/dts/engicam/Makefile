@@ -9,6 +9,10 @@ dtb-$(CONFIG_ARCH_MXC) += imx8ulp-microgea-ofcap2.dtb \
 			  imx8mp-smarcore-multimedia-4k-lvds.dtb \
 			  imx8mp-smarcore-multimedia-4k-pcie.dtb \
 			  imx8xd-icore-starterkit.dtb \
+			  imx8xd-icore-ctouch2.dtb \
+			  imx8xd-icore-ctouch2-yes7.dtb \
 			  imx8xq-icore-starterkit.dtb \
+			  imx8xq-icore-ctouch2.dtb \
+			  imx8xq-icore-ctouch2-yes7.dtb \
 			  imx8mm-icore-starterkit.dtb \
-			  
+
