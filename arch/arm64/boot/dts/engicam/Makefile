@@ -15,4 +15,5 @@ dtb-$(CONFIG_ARCH_MXC) += imx8ulp-microgea-ofcap2.dtb \
 			  imx8xq-icore-ctouch2.dtb \
 			  imx8xq-icore-ctouch2-yes7.dtb \
 			  imx8mm-icore-starterkit.dtb \
+			  imx8mm-icore-ksz9021-starterkit.dtb \
 
