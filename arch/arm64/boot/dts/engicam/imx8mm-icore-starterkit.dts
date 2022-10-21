@@ -233,8 +233,8 @@
 		reg = <0x25>;
 		pinctrl-0 = <&pinctrl_pmic>;
 		pinctrl-names = "default";
-		interrupt-parent = <&gpio1>;
-		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
 
 		regulators {
 			buck1_reg: BUCK1 {
@@ -857,7 +857,7 @@
 
 	pinctrl_pmic: pmicirqgrp {
 		fsl,pins = <
-			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x141
+			MX8MM_IOMUXC_NAND_ALE_GPIO3_IO0		0x141
 		>;
 	};
 
