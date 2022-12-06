@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2020 Engicam
+ */
+
+/dts-v1/;
+
+#include "imx8mp-icore-starterkit.dts"
+
+/ {
+	model = "Engicam i.MX8MPlus DimSport - Fasteth ";
+
+
+ 	gpio_export {
+ 		compatible = "gpio-export";
+ 		#size-cells = <0>;
+
+		ethres {
+			gpio-export,name = "ethres";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 29 0>;
+		};
+
+		eth_d2 {
+			gpio-export,name = "eth_d2";
+			gpios = <&gpio1 19 0>;
+		};
+ 	};
+
+};
+
+&eqos {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_eqos>;
+	phy-mode = "rmii";
+	phy-handle = <&ethphy1>;
+	//phy-reset-gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
+	snps,rmii_refclk_ext;
+	status = "okay";
+
+	mdio {
+		compatible = "snps,dwmac-mdio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy1: ethernet-phy@0 {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <0x0>;
+		};
+	};
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>;
+
+	pinctrl_eqos: eqosgrp {
+		fsl,pins = <
+
+			MX8MP_IOMUXC_ENET_MDC__ENET_QOS_MDC		0x3
+			MX8MP_IOMUXC_ENET_MDIO__ENET_QOS_MDIO		0x3
+			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL 0x12
+			MX8MP_IOMUXC_ENET_TD0__ENET_QOS_RGMII_TD0	0x12
+			MX8MP_IOMUXC_ENET_TD1__ENET_QOS_RGMII_TD1	0x12
+			MX8MP_IOMUXC_ENET_TD2__CCM_ENET_QOS_CLOCK_GENERATE_REF_CLK 0x12
+			MX8MP_IOMUXC_ENET_TD3__GPIO1_IO18 0x1f
+
+			MX8MP_IOMUXC_ENET_RX_CTL__ENET_QOS_RGMII_RX_CTL 0x1d0
+			MX8MP_IOMUXC_ENET_RXC__ENET_QOS_RX_ER 0x91
+			MX8MP_IOMUXC_ENET_RD0__ENET_QOS_RGMII_RD0	0x1d0
+			MX8MP_IOMUXC_ENET_RD1__ENET_QOS_RGMII_RD1	0x1d0
+
+			MX8MP_IOMUXC_ENET_RD3__GPIO1_IO29 0x1f //reset phy
+		>;
+	};
+};
