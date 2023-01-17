@@ -17,6 +17,33 @@
 		stdout-path = &lpuart5;
 	};
 
+	panel_lvds: panel-lvds {
+		compatible = "panel-lvds";
+		width-mm = <152>;
+		height-mm = <92>;
+		data-mapping = "vesa-24";
+		status = "okay";
+
+		panel-timing {
+			/* 1024x600 @65Hz */
+			clock-frequency = <60000000>;
+			hactive = <1024>;
+			vactive = <600>;
+			hsync-len = <20>;
+			hfront-porch = <150>;
+			hback-porch = <150>;
+			vfront-porch = <15>;
+			vback-porch = <15>;
+			vsync-len = <5>;
+		};
+
+		port {
+			panel_in_rgb: endpoint {
+				remote-endpoint = <&dcnano_out_lcd>;
+			};
+		};
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
@@ -193,7 +220,23 @@
 };
 
 &dcnano {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcd>;
 	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			dcnano_out_lcd: endpoint@1 {
+				remote-endpoint = <&panel_in_rgb>;
+			};
+		};
+	};
 };
 
 &dphy {
@@ -201,7 +244,7 @@
 };
 
 &dsi {
-	status = "okay";
+	status = "disabled";
 	ports {
 		port@1 {
 			reg = <1>;
@@ -238,23 +281,6 @@
 			reg = <1>;
 			micrel,led-mode = <1>;
 		};
-	};
-};
-
-&flexspi2 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_flexspi2_ptd>;
-	pinctrl-1 = <&pinctrl_flexspi2_ptd>;
-	status = "okay";
-
-	mx25uw51345gxdi00: flash@0 {
-		reg = <0>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "jedec,spi-nor";
-		spi-max-frequency = <200000000>;
-		spi-tx-bus-width = <8>;
-		spi-rx-bus-width = <8>;
 	};
 };
 
@@ -335,22 +361,6 @@
 	status = "okay";
 };
 
-&lpspi5 {
-	fsl,spi-num-chipselects = <1>;
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_lpspi5>;
-	pinctrl-1 = <&pinctrl_lpspi5>;
-	cs-gpios = <&gpiof 19 GPIO_ACTIVE_LOW>;
-	pinctrl-assert-gpios = <&pca6416_1 10 GPIO_ACTIVE_LOW>;
-	status = "okay";
-
-	spidev0: spi@0 {
-		reg = <0>;
-		compatible = "lwn,bk4";
-		spi-max-frequency = <1000000>;
-	};
-};
-
 &lpuart5 {
 	/* console */
 	pinctrl-names = "default", "sleep";
@@ -364,14 +374,6 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_lpuart6>;
 	pinctrl-1 = <&pinctrl_lpuart6>;
-	status = "okay";
-};
-
-&lpuart7 {
-	/* FT4232 PortD: need to connect J25/J26 2-3 */
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_lpuart7>;
-	pinctrl-1 = <&pinctrl_lpuart7>;
 	status = "okay";
 };
 
@@ -397,26 +399,6 @@
 };
 
 &mu3 {
-	status = "okay";
-};
-
-&sai5 {
-	#sound-dai-cells = <0>;
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_sai5>;
-	pinctrl-1 = <&pinctrl_sai5>;
-	assigned-clocks = <&cgc1 IMX8ULP_CLK_SAI5_SEL>;
-	assigned-clock-parents = <&cgc1 IMX8ULP_CLK_SPLL3_PFD1_DIV1>;
-	fsl,dataline = <0 0x08 0x01>;
-	status = "okay";
-};
-
-&spdif {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_spdif>;
-	pinctrl-1 = <&pinctrl_spdif>;
-	assigned-clocks = <&cgc2 IMX8ULP_CLK_SPDIF_SEL>;
-	assigned-clock-parents = <&cgc1 IMX8ULP_CLK_SPLL3_PFD1_DIV1>;
 	status = "okay";
 };
 
@@ -475,33 +457,43 @@
 	status = "okay";
 };
 
-&usdhc2 {
-	pinctrl-names = "default", "state_100mhz", "state_200mhz", "sleep";
-	pinctrl-0 = <&pinctrl_usdhc2_pte>;
-	pinctrl-1 = <&pinctrl_usdhc2_pte>;
-	pinctrl-2 = <&pinctrl_usdhc2_pte>;
-	pinctrl-3 = <&pinctrl_usdhc2_pte>;
-	mmc-pwrseq = <&usdhc2_pwrseq>;
-	max-frequency = <100000000>;
-	bus-width = <4>;
-	keep-power-in-suspend;
-	non-removable;
-	wakeup-source;
-	fsl,sdio-async-interrupt-enabled;
-	status = "okay";
-
-	wifi_wake_host {
-		compatible = "nxp,wifi-wake-host";
-		interrupt-parent = <&gpioe>;
-		interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
-		interrupt-names = "host-wake";
-	};
-};
-
 &iomuxc1 {
 	pinctrl_dsi: dsigrp {
 		fsl,pins = <
 			MX8ULP_PAD_PTF8__PTF8		0x3
+		>;
+	};
+
+	pinctrl_lcd: lcdgrp {
+		fsl,pins = <
+			MX8ULP_PAD_PTF23__DPI0_D0   	0x43
+			MX8ULP_PAD_PTF22__DPI0_D1   	0x43
+			MX8ULP_PAD_PTF21__DPI0_D2   	0x43
+			MX8ULP_PAD_PTF20__DPI0_D3  		0x43
+			MX8ULP_PAD_PTF19__DPI0_D4		0x43
+			MX8ULP_PAD_PTF18__DPI0_D5   	0x43
+			MX8ULP_PAD_PTD11__DPI0_D6		0x43
+			MX8ULP_PAD_PTF16__DPI0_D7		0x43
+			MX8ULP_PAD_PTF15__DPI0_D8		0x43
+			MX8ULP_PAD_PTF14__DPI0_D9		0x43
+			MX8ULP_PAD_PTF13__DPI0_D10		0x43
+			MX8ULP_PAD_PTF12__DPI0_D11		0x43
+			MX8ULP_PAD_PTF11__DPI0_D12		0x43
+			MX8ULP_PAD_PTF10__DPI0_D13		0x43
+			MX8ULP_PAD_PTD19__DPI0_D14		0x43
+			MX8ULP_PAD_PTD20__DPI0_D15		0x43
+			MX8ULP_PAD_PTD21__DPI0_D16		0x43
+			MX8ULP_PAD_PTD22__DPI0_D17		0x43
+			MX8ULP_PAD_PTD23__DPI0_D18		0x43
+			MX8ULP_PAD_PTE0__DPI0_D19		0x43
+			MX8ULP_PAD_PTE1__DPI0_D20		0x43
+			MX8ULP_PAD_PTE2__DPI0_D21		0x43
+			MX8ULP_PAD_PTE3__DPI0_D22		0x43
+			MX8ULP_PAD_PTE4__DPI0_D23		0x43
+			MX8ULP_PAD_PTF26__DPI0_HSYNC	0x43
+			MX8ULP_PAD_PTF25__DPI0_VSYNC	0x43
+			MX8ULP_PAD_PTF24__DPI0_PCLK		0x43
+			MX8ULP_PAD_PTF27__DPI0_DE		0x43
 		>;
 	};
 
@@ -517,39 +509,12 @@
 			MX8ULP_PAD_PTE23__ENET0_TXD0    0x43
 			MX8ULP_PAD_PTE22__ENET0_TXD1    0x43
 			MX8ULP_PAD_PTE19__ENET0_REFCLK  0x43
-			MX8ULP_PAD_PTF10__ENET0_1588_CLKIN 0x43
-		>;
-	};
-
-	pinctrl_flexspi2_ptd: flexspi2ptdgrp {
-		fsl,pins = <
-
-			MX8ULP_PAD_PTD12__FLEXSPI2_A_SS0_B	0x42
-			MX8ULP_PAD_PTD13__FLEXSPI2_A_SCLK	0x42
-			MX8ULP_PAD_PTD14__FLEXSPI2_A_DATA3	0x42
-			MX8ULP_PAD_PTD15__FLEXSPI2_A_DATA2	0x42
-			MX8ULP_PAD_PTD16__FLEXSPI2_A_DATA1	0x42
-			MX8ULP_PAD_PTD17__FLEXSPI2_A_DATA0	0x42
-			MX8ULP_PAD_PTD18__FLEXSPI2_A_DQS	0x42
-			MX8ULP_PAD_PTD19__FLEXSPI2_A_DATA7	0x42
-			MX8ULP_PAD_PTD20__FLEXSPI2_A_DATA6	0x42
-			MX8ULP_PAD_PTD21__FLEXSPI2_A_DATA5	0x42
-			MX8ULP_PAD_PTD22__FLEXSPI2_A_DATA4	0x42
 		>;
 	};
 
 	pinctrl_gpio_keys: gpiokeys {
 		fsl,pins = <
 			MX8ULP_PAD_PTF31__PTF31		0x3
-		>;
-	};
-
-	pinctrl_lpspi5: lpspi5grp {
-		fsl,pins = <
-			MX8ULP_PAD_PTF16__LPSPI5_SIN	0x3
-			MX8ULP_PAD_PTF17__LPSPI5_SOUT	0x3
-			MX8ULP_PAD_PTF18__LPSPI5_SCK	0x3
-			MX8ULP_PAD_PTF19__PTF19		0x3
 		>;
 	};
 
@@ -569,13 +534,6 @@
 		>;
 	};
 
-	pinctrl_lpuart7: lpuart7grp {
-		fsl,pins = <
-			MX8ULP_PAD_PTF22__LPUART7_TX	0x3
-			MX8ULP_PAD_PTF23__LPUART7_RX	0x3
-		>;
-	};
-
 	pinctrl_lpi2c7: lpi2c7grp {
 		fsl,pins = <
 			MX8ULP_PAD_PTE12__LPI2C7_SCL	0x20
@@ -592,23 +550,7 @@
 
 	pinctrl_otgid2: usb2grp {
 		fsl,pins = <
-			MX8ULP_PAD_PTD23__USB1_ID	0x10003
 			MX8ULP_PAD_PTF6__USB1_OC	0x10003
-		>;
-	};
-
-	pinctrl_sai5: sai5grp {
-		fsl,pins = <
-			MX8ULP_PAD_PTF26__I2S5_TX_BCLK  0x43
-			MX8ULP_PAD_PTF27__I2S5_TX_FS    0x43
-			MX8ULP_PAD_PTF28__I2S5_TXD0     0x43
-			MX8ULP_PAD_PTF24__I2S5_RXD3 	0x43
-		>;
-	};
-
-	pinctrl_spdif: spdifgrp {
-		fsl,pins = <
-			MX8ULP_PAD_PTF25__SPDIF_OUT1    0x43
 		>;
 	};
 
@@ -626,18 +568,6 @@
 			MX8ULP_PAD_PTD3__SDHC0_D7	0x3
 		>;
 	};
-
-	pinctrl_usdhc2_pte: usdhc2ptegrp {
-		fsl,pins = <
-			MX8ULP_PAD_PTE1__SDHC2_D0	0x3
-			MX8ULP_PAD_PTE0__SDHC2_D1	0x3
-			MX8ULP_PAD_PTE5__SDHC2_D2	0x3
-			MX8ULP_PAD_PTE4__SDHC2_D3	0x3
-			MX8ULP_PAD_PTE2__SDHC2_CLK	0x10002
-			MX8ULP_PAD_PTE3__SDHC2_CMD	0x3
-		>;
-	};
-
 };
 
 &cameradev {
