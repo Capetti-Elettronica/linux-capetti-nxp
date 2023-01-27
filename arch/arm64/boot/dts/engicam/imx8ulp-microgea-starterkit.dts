@@ -162,11 +162,6 @@
 		regulator-always-on;
 	};
 
-	usdhc2_pwrseq: usdhc2_pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&pcal6408 2 GPIO_ACTIVE_LOW>;
-	};
-
 	bt_sco_codec: bt_sco_codec {
 		#sound-dai-cells = <1>;
 		compatible = "linux,bt-sco";
@@ -273,6 +268,8 @@
 	phy-handle = <&ethphy>;
 	status = "okay";
 
+	phy-reset-gpios = <&gpioe 13 GPIO_ACTIVE_LOW>;
+
 	mdio {
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -375,23 +372,6 @@
 	pinctrl-0 = <&pinctrl_lpuart6>;
 	pinctrl-1 = <&pinctrl_lpuart6>;
 	status = "okay";
-};
-
-&lpi2c7 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	clock-frequency = <400000>;
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&pinctrl_lpi2c7>;
-	pinctrl-1 = <&pinctrl_lpi2c7>;
-	status = "okay";
-
-	pcal6408: gpio@21 {
-		compatible = "nxp,pcal9554b";
-		reg = <0x21>;
-		gpio-controller;
-		#gpio-cells = <2>;
-	};
 };
 
 &mu {
@@ -503,12 +483,13 @@
 			MX8ULP_PAD_PTE14__ENET0_MDIO    0x43
 			MX8ULP_PAD_PTE17__ENET0_RXER    0x43
 			MX8ULP_PAD_PTE18__ENET0_CRS_DV  0x43
-			MX8ULP_PAD_PTF1__ENET0_RXD0     0x43
+			MX8ULP_PAD_PTE21__ENET0_RXD0    0x43
 			MX8ULP_PAD_PTE20__ENET0_RXD1    0x43
 			MX8ULP_PAD_PTE16__ENET0_TXEN    0x43
 			MX8ULP_PAD_PTE23__ENET0_TXD0    0x43
 			MX8ULP_PAD_PTE22__ENET0_TXD1    0x43
 			MX8ULP_PAD_PTE19__ENET0_REFCLK  0x43
+			MX8ULP_PAD_PTE13__PTE13		  	0x43
 		>;
 	};
 
@@ -531,13 +512,6 @@
 			MX8ULP_PAD_PTE11__LPUART6_RX	0x3
 			MX8ULP_PAD_PTE9__LPUART6_RTS_B	0x3
 			MX8ULP_PAD_PTE8__LPUART6_CTS_B	0x3
-		>;
-	};
-
-	pinctrl_lpi2c7: lpi2c7grp {
-		fsl,pins = <
-			MX8ULP_PAD_PTE12__LPI2C7_SCL	0x20
-			MX8ULP_PAD_PTE13__LPI2C7_SDA	0x20
 		>;
 	};
 
