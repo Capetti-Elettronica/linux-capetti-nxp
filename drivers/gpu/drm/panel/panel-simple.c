@@ -1500,6 +1500,39 @@ static const struct panel_desc bananapi_s070wv20_ct16 = {
 	},
 };
 
+
+static const struct drm_display_mode engicam_starterterkit_mode = {
+	.clock = 71143,
+	.hdisplay = 1024,
+	.hsync_start = 1024 + 48,
+	.hsync_end = 1024 + 48 + 32,
+	.htotal = 1024 + 48 + 32 + 80,
+	.vdisplay = 600,
+	.vsync_start = 600 + 3,
+	.vsync_end = 600 + 3 + 6,
+	.vtotal = 600 + 3 + 6 + 14,
+};
+
+static const struct panel_desc engicam_starterterkit = {
+	.modes = &engicam_starterterkit_mode   ,
+	.num_modes = 1,
+	.bpc = 8,
+	.size = {
+		.width = 261,
+		.height = 163,
+	},
+	.delay = {
+		.prepare = 8,
+		.enable = 300,
+		.unprepare = 300,
+		.disable = 60,
+	},
+	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
+	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
+	.connector_type = DRM_MODE_CONNECTOR_LVDS,
+};
+
+
 static const struct drm_display_mode boe_ev121wxm_n10_1850_mode = {
 	.clock = 71143,
 	.hdisplay = 1280,
@@ -4616,6 +4649,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "boe,ev121wxm-n10-1850",
 		.data = &boe_ev121wxm_n10_1850,
+	}, {		
+		.compatible = "engicam_starterterkit",
+		.data = &engicam_starterterkit,
 	}, {
 		.compatible = "boe,hv070wsa-100",
 		.data = &boe_hv070wsa
