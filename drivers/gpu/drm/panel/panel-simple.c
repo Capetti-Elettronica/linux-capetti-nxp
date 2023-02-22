@@ -1501,7 +1501,7 @@ static const struct panel_desc bananapi_s070wv20_ct16 = {
 };
 
 
-static const struct drm_display_mode engicam_starterterkit_mode = {
+static const struct drm_display_mode engicam_starterkit_mode = {
 	.clock = 71143,
 	.hdisplay = 1024,
 	.hsync_start = 1024 + 48,
@@ -1513,8 +1513,8 @@ static const struct drm_display_mode engicam_starterterkit_mode = {
 	.vtotal = 600 + 3 + 6 + 14,
 };
 
-static const struct panel_desc engicam_starterterkit = {
-	.modes = &engicam_starterterkit_mode   ,
+static const struct panel_desc engicam_starterkit = {
+	.modes = &engicam_starterkit_mode   ,
 	.num_modes = 1,
 	.bpc = 8,
 	.size = {
@@ -4650,8 +4650,8 @@ static const struct of_device_id platform_of_match[] = {
 		.compatible = "boe,ev121wxm-n10-1850",
 		.data = &boe_ev121wxm_n10_1850,
 	}, {		
-		.compatible = "engicam_starterterkit",
-		.data = &engicam_starterterkit,
+		.compatible = "engicam_starterkit",
+		.data = &engicam_starterkit,
 	}, {
 		.compatible = "boe,hv070wsa-100",
 		.data = &boe_hv070wsa

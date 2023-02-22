@@ -21,7 +21,7 @@
 	};
 
 	lvds_panel {
-		compatible = "engicam_starterterkit";
+		compatible = "engicam_starterkit";
 		backlight = <&lvds_backlight>;
 
 		port {
@@ -389,7 +389,7 @@
 		compatible = "nxp,pca9451a";
 		reg = <0x25>;
 		
-		// non connesso in realtà
+		
 		interrupt-parent = <&gpio1>;
 		interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
 
