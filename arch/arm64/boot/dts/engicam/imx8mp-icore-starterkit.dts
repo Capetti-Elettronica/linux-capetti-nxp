@@ -615,7 +615,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_laird>;
 	bus-width = <4>;
-	mo-1-8-v;
+	no-1-8-v;
 	pm-ignore-notify;
 	keep-power-in-suspend;
 	vmmc-supply = <&wl_reg_on>;
