@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2020 Engicam
+ */
+
+/dts-v1/;
+
+#include "imx8mp-icore-starterkit.dts"
+
+
+/ {
+	model = "Engicam i.Core i.MX8MPlus Dual-Core StarterKit (459B)";
+};
+
+&A53_2 {
+	status = "disabled";
+};
+
+&A53_3 {
+	status = "disabled";
+};
