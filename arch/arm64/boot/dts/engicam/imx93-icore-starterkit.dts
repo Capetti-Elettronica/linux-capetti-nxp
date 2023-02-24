@@ -30,7 +30,7 @@
 			};
 		};
 	};
-	
+
 	chosen {
 		stdout-path = &lpuart1;
 	};
@@ -112,11 +112,11 @@
 		regulator-min-microvolt = <100000>;
 		regulator-max-microvolt = <3300000>;
 		states = <3300000 0x1>,
-				 <100000 0x0>;		
+				 <100000 0x0>;
 		gpios = <&gpio2 22 GPIO_ACTIVE_HIGH>;
 		regulator-always-on;
 	};
-	
+
 	bt_reg_on: regulator-btregon {
 		compatible = "regulator-gpio";
 		regulator-name = "BT_REG_ON";
@@ -128,13 +128,13 @@
 				 <100000 0x0>;
 		gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>;
 		regulator-always-on;
-	};	
-	
+	};
+
 	reg_can2_stby: regulator-can2-stby {
 		compatible = "regulator-fixed";
 		regulator-name = "can2-stby";
 		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;		
+		regulator-max-microvolt = <3300000>;
 		enable-active-low;
 	};
 
@@ -301,7 +301,7 @@
 	pinctrl-0 = <&pinctrl_lpi2c1>;
 	pinctrl-1 = <&pinctrl_lpi2c1>;
 	status = "okay";
-	
+
 	polytouch: edt-ft5x26@38 {
 		compatible = "edt,edt-ft5x26";
 		reg = <0x38>;
@@ -329,8 +329,8 @@
 	pmic@25 {
 		compatible = "nxp,pca9451a";
 		reg = <0x25>;
-		
-		
+
+
 		interrupt-parent = <&gpio1>;
 		interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
 
@@ -426,6 +426,12 @@
 	status = "okay";
 };
 
+&lpuart5 { /* RS485 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart5>;
+	status = "okay";
+};
+
 &mu1 {
 	status = "okay";
 };
@@ -464,7 +470,7 @@
 	status = "okay";
 };
 
-&usdhc3 {
+&usdhc3 {/* WiFi*/
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc3>;
 	pinctrl-1 = <&pinctrl_usdhc3>;
@@ -473,11 +479,11 @@
 	bus-width = <4>;
 	no-1-8-v;
 	non-removable;
-	status = "okay";
-	
+	status = "disabled";
+
 	#address-cells = <1>;
 	#size-cells = <0>;
-	
+
 	brcmf: bcrmf@1 {
 		reg = <1>;
 		compatible = "brcm,bcm4329-fmac";
@@ -521,7 +527,7 @@
 			MX93_PAD_ENET2_TD3__ENET1_RGMII_TD3             0x57e
 			MX93_PAD_ENET2_TXC__ENET1_RGMII_TXC             0x5fe
 			MX93_PAD_ENET2_TX_CTL__ENET1_RGMII_TX_CTL       0x57e
-			
+
 			MX93_PAD_GPIO_IO05__GPIO2_IO05					0x57e // backlight
 		>;
 	};
@@ -550,8 +556,8 @@
 		fsl,pins = <
 			MX93_PAD_GPIO_IO07__GPIO2_IO07	0x31e	/* INT */
 		>;
-	};	
-	
+	};
+
 	pinctrl_flexcan2: flexcan2grp {
 		fsl,pins = <
 			MX93_PAD_GPIO_IO25__CAN2_TX	0x139e
@@ -582,10 +588,10 @@
 
 	pinctrl_uart5: uart5grp {
 		fsl,pins = <
-			MX93_PAD_DAP_TDO_TRACESWO__LPUART5_TX	0x31e
-			MX93_PAD_DAP_TDI__LPUART5_RX		0x31e
-			MX93_PAD_DAP_TMS_SWDIO__LPUART5_RTS_B	0x31e
-			MX93_PAD_DAP_TCLK_SWCLK__LPUART5_CTS_B	0x31e
+			MX93_PAD_GPIO_IO01__LPUART5_RX			0x31e
+			MX93_PAD_GPIO_IO00__LPUART5_TX			0x31e
+			MX93_PAD_GPIO_IO02__LPUART5_CTS_B		0x31e
+			MX93_PAD_GPIO_IO03__LPUART5_RTS_B		0x31e
 		>;
 	};
 
@@ -633,19 +639,19 @@
 			MX93_PAD_SD3_DATA3__USDHC3_DATA3        0x13fe
 		>;
 	};
-	
+
 	pinctrl_wl_regon: wlregon	{
 		fsl,pins = <
 			MX93_PAD_GPIO_IO22__GPIO2_IO22			0x31e //WL_REG_ON
-		>;			
+		>;
 	};
 
 	pinctrl_bt_regon: btregon	{
-		fsl,pins = <	
+		fsl,pins = <
 			MX93_PAD_GPIO_IO19__GPIO2_IO19			0x31e //BT_REG_ON
-		>;			
-	};	
-	
+		>;
+	};
+
 	pinctrl_sai1: sai1grp {
 		fsl,pins = <
 			MX93_PAD_SAI1_TXC__SAI1_TX_BCLK			0x31e
