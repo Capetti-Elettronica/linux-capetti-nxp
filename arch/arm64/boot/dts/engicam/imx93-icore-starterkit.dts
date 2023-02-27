@@ -10,13 +10,12 @@
 
 / {
 	model = "NXP i.MX93 iCore";
-	compatible = "fsl,imx93";
+	compatible = "engi-imx93" ,"fsl,imx93";
 
 	bt_reg_on: regulator-btregon {
 		compatible = "regulator-gpio";
 		regulator-name = "BT_REG_ON";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_bt_regon>;
 		regulator-min-microvolt = <100000>;
 		regulator-max-microvolt = <3300000>;
 		states = <3300000 0x1>,
@@ -234,14 +233,14 @@
 	wl_reg_on: regulator-wlregon {
 		compatible = "regulator-gpio";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_wl_regon>;
 		regulator-name = "WL_REG_ON";
 		regulator-min-microvolt = <100000>;
 		regulator-max-microvolt = <3300000>;
 		states = <3300000 0x1>,
 				 <100000 0x0>;
 		gpios = <&gpio2 22 GPIO_ACTIVE_HIGH>;
-		regulator-always-on;
+		enable-active-high;
+		vin-supply = <&bt_reg_on>;
 	};
 };
 
@@ -540,14 +539,14 @@
 
 &usdhc3 {/* WiFi*/
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc3>;
-	pinctrl-1 = <&pinctrl_usdhc3>;
-	pinctrl-2 = <&pinctrl_usdhc3>;
+	pinctrl-0 = <&pinctrl_usdhc3>, <&pinctrl_laird>;
+	pinctrl-1 = <&pinctrl_usdhc3>, <&pinctrl_laird>;
+	pinctrl-2 = <&pinctrl_usdhc3>, <&pinctrl_laird>;
 	vmmc-supply = <&wl_reg_on>;
 	bus-width = <4>;
 	no-1-8-v;
 	non-removable;
-	status = "disabled";
+	status = "okay";
 
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -563,12 +562,6 @@
 	edt_ft5x06_pins: edt-ft5x06-pins-grp{
 		fsl,pins = <
 			MX93_PAD_GPIO_IO07__GPIO2_IO07	0x31e	/* INT */
-		>;
-	};
-
-	pinctrl_bt_regon: btregon	{
-		fsl,pins = <
-			MX93_PAD_GPIO_IO19__GPIO2_IO19			0x31e //BT_REG_ON
 		>;
 	};
 
@@ -623,6 +616,13 @@
 		fsl,pins = <
 			MX93_PAD_GPIO_IO25__CAN2_TX	0x139e
 			MX93_PAD_GPIO_IO27__CAN2_RX	0x139e
+		>;
+	};
+
+	pinctrl_laird: lairdgrp {
+		fsl,pins = <
+			MX93_PAD_GPIO_IO22__GPIO2_IO22			0x31e //WL_REG_ON
+			MX93_PAD_GPIO_IO19__GPIO2_IO19			0x31e //BT_REG_ON
 		>;
 	};
 
@@ -715,12 +715,6 @@
 			MX93_PAD_SD3_DATA1__USDHC3_DATA1        0x13fe
 			MX93_PAD_SD3_DATA2__USDHC3_DATA2        0x13fe
 			MX93_PAD_SD3_DATA3__USDHC3_DATA3        0x13fe
-		>;
-	};
-
-	pinctrl_wl_regon: wlregon	{
-		fsl,pins = <
-			MX93_PAD_GPIO_IO22__GPIO2_IO22			0x31e //WL_REG_ON
 		>;
 	};
 };
