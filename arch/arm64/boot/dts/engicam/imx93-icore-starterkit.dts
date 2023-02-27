@@ -97,6 +97,14 @@
 		vin-supply = <&reg_vaa_sel>;
 	};
 
+	reg_can1_stby: regulator-can1-stby {
+		compatible = "regulator-fixed";
+		regulator-name = "can1-stby";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-low;
+	};
+
 	reg_can2_stby: regulator-can2-stby {
 		compatible = "regulator-fixed";
 		regulator-name = "can2-stby";
@@ -288,10 +296,17 @@
 	};
 };
 
+&flexcan1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan1>;
+	fsl,stop-mode = <&anomix_ns_gpr 0x10 4>;
+	status = "okay";
+};
+
 &flexcan2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
-	xceiver-supply = <&reg_can2_stby>;
+	fsl,stop-mode = <&anomix_ns_gpr 0x10 4>;
 	status = "okay";
 };
 
@@ -594,6 +609,13 @@
 			MX93_PAD_ENET2_TX_CTL__ENET1_RGMII_TX_CTL       0x57e
 
 			MX93_PAD_GPIO_IO05__GPIO2_IO05					0x57e // backlight
+		>;
+	};
+
+	pinctrl_flexcan1: flexcan1grp {
+		fsl,pins = <
+			MX93_PAD_PDM_CLK__CAN1_TX	0x139e
+			MX93_PAD_PDM_BIT_STREAM0__CAN1_RX	0x139e
 		>;
 	};
 
