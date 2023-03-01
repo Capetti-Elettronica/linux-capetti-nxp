@@ -10,7 +10,11 @@
 
 / {
 	model = "NXP i.MX93 iCore";
-	compatible = "engi-imx93" ,"fsl,imx93";
+	compatible = "engi,imx93" ,"fsl,imx93";
+
+	aliases {
+		rtc1= &bbnsm_rtc;
+	};
 
 	bt_reg_on: regulator-btregon {
 		compatible = "regulator-gpio";
@@ -546,7 +550,7 @@
 	bus-width = <4>;
 	no-1-8-v;
 	non-removable;
-	status = "okay";
+	status = "disabled";
 
 	#address-cells = <1>;
 	#size-cells = <0>;
