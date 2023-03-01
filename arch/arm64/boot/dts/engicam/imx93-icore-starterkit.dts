@@ -9,7 +9,7 @@
 #include "../freescale/imx93.dtsi"
 
 / {
-	model = "NXP i.MX93 iCore";
+	model = "NXP i.MX93 iCore - Starterkit";
 	compatible = "engi,imx93" ,"fsl,imx93";
 
 	aliases {
@@ -531,13 +531,15 @@
 	status = "okay";
 };
 
-&usdhc2 {
+&usdhc2 {/*SD Card*/
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	pinctrl-1 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	pinctrl-2 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	cd-gpios = <&gpio3 00 GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
+	no-1-8-v;
+	max-frequency = <25000000>;
 	status = "okay";
 };
 
@@ -550,7 +552,8 @@
 	bus-width = <4>;
 	no-1-8-v;
 	non-removable;
-	status = "disabled";
+	max-frequency = <25000000>;
+	status = "okay";
 
 	#address-cells = <1>;
 	#size-cells = <0>;
