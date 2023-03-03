@@ -15,7 +15,11 @@
 	chosen {
 		stdout-path = &uart2;
 	};
-
+	
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+		
 	memory@40000000 {
 		device_type = "memory";
 		reg = <0x0 0x40000000 0 0xc0000000>,
@@ -534,9 +538,6 @@
 	status = "okay";
 };
 
-&snvs_pwrkey {
-	status = "okay";
-};
 
 &easrc {
 	fsl,asrc-rate  = <48000>;
@@ -561,14 +562,8 @@
 				 <&clk IMX8MP_SYS_PLL2_50M>;
 	l1ss-disabled;
 	status = "okay";
-
-	wifi_wake_host {
-		compatible = "nxp,wifi-wake-host";
-		interrupt-parent = <&gpio5>;
-		interrupts = <21 IRQ_TYPE_LEVEL_LOW>;
-		interrupt-names = "host-wake";
-	};
 };
+
 &pcie_phy{
 	ext_osc = <1>;
 	status = "okay";
@@ -704,7 +699,7 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c3
 			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
-			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000119
+			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000019
 			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
 		>;
 	};
@@ -924,7 +919,7 @@
 
 	pinctrl_wdog: wdoggrp {
 		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B	0x166
+			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B	0xc6
 		>;
 	};
 
@@ -1007,22 +1002,28 @@
 };
 
 &irqsteer_hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_blk_ctrl {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_pavi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmiphy {
-	status = "okay";
+	status = "disabled";
+};
+
+&lcdif3 {
+	status = "disabled";
+	thres-low  = <1 2>;             /* (FIFO * 1 / 2) */
+	thres-high = <3 4>;             /* (FIFO * 3 / 4) */
 };
 
