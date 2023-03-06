@@ -13,15 +13,14 @@
 	model = "Engicam i.Core i.MX8MPlus  Dual Ethernet";
 	compatible = "engi,imx8-icore", "fsl,imx8mp";
 
-	aliases {
-		rtc1 = &snvs_rtc;
-	};
-
-
 	chosen {
 		stdout-path = &uart2;
 	};
-
+	
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+		
 	memory@40000000 {
 		device_type = "memory";
 		reg = <0x0 0x40000000 0 0xc0000000>,
@@ -38,6 +37,17 @@
 		gpio = <&gpio4 21 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-always-on;
+	};
+
+	reg_usdhc2_vmmc: regulator-usdhc2 {
+		compatible = "regulator-fixed";
+		regulator-name = "VSD_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		startup-delay-us = <100>;
+		off-on-delay-us = <12000>;
 	};
 
 	wl_reg_on: regulator-wlregon {
@@ -85,22 +95,6 @@
 		always-on;
 	};
 
-	sound-hdmi {
-		compatible = "fsl,imx-audio-cdnhdmi";
-		model = "audio-hdmi";
-		audio-cpu = <&aud2htx>;
-		hdmi-out;
-		constraint-rate = <44100>,
-				<88200>,
-				<176400>,
-				<32000>,
-				<48000>,
-				<96000>,
-				<192000>;
-		status = "disabled";
-	};
-
-
 	sound {
 		compatible = "simple-audio-card";
 
@@ -132,6 +126,21 @@
 		};
 	};
 
+	sound-hdmi {
+		compatible = "fsl,imx-audio-hdmi";
+		model = "audio-hdmi";
+		audio-cpu = <&aud2htx>;
+		hdmi-out;
+		constraint-rate = <44100>,
+				<88200>,
+				<176400>,
+				<32000>,
+				<48000>,
+				<96000>,
+				<192000>;
+		status = "okay";
+	};
+	
 	audio_backlight: audio_backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm4 0 100>;
@@ -150,7 +159,6 @@
 				    100>;
 		default-brightness-level = <50>;
 	};
-
 
 	lvds_backlight: lvds_backlight {
 		compatible = "pwm-backlight";
@@ -215,7 +223,6 @@
 &A53_3 {
 	cpu-supply = <&buck2>;
 };
-
 
 &dsp {
 	status = "okay";
@@ -343,11 +350,6 @@
 		};
 	};
 };
-
-&i2c1{
-	status = "disabled";
-};
-
 
 &i2c6 {
 	clock-frequency = <1000>;
@@ -537,7 +539,6 @@
 	status = "okay";
 };
 
-
 &ldb {
 	status = "okay";
 
@@ -561,10 +562,6 @@
 };
 
 &mipi_dsi {
-	status = "okay";
-};
-
-&snvs_pwrkey {
 	status = "okay";
 };
 
@@ -620,25 +617,16 @@
 	status = "okay";
 };
 
-
-&uart1 { /* RS232 */
+&uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1>;
 	status = "okay";
 };
 
-&uart2 {/* console */
+&uart2 {
+	/* console */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
-	status = "okay";
-};
-
-&uart3 { /* BT UART */
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3>;
-	assigned-clocks = <&clk IMX8MP_CLK_UART3>;
-	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_80M>;
-	fsl,uart-has-rtscts;
 	status = "okay";
 };
 
@@ -668,6 +656,15 @@
 	status = "okay";
 };
 
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	assigned-clocks = <&clk IMX8MP_CLK_UART3>;
+	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_80M>;
+	fsl,uart-has-rtscts;
+	status = "okay";
+};
+
 /* WIFI */
 &usdhc1 {
 	#address-cells = <1>;
@@ -675,7 +672,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_laird>;
 	bus-width = <4>;
-	mo-1-8-v;
+	no-1-8-v;
 	pm-ignore-notify;
 	keep-power-in-suspend;
 	vmmc-supply = <&wl_reg_on>;
@@ -686,7 +683,6 @@
 		reg = <1>;
 		compatible = "brcm,bcm4329-fmac";
 	};
-
 };
 
 /* SDCARD */
@@ -694,12 +690,12 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
+	vmmc-supply = <&reg_usdhc2_vmmc>;
  	no-1-8-v;
 	max-frequency = <35000000>;
 	bus-width = <4>;
 	status = "okay";
 };
-
 
 /* EMMC */
 &usdhc3 {
@@ -749,7 +745,6 @@
 			MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT	0x116
 		>;
 	};
-
 
 	pinctrl_eqos: eqosgrp {
 		fsl,pins = <
@@ -1049,5 +1044,31 @@
 	m2m_device {
 		status = "okay";
 	};
+};
+
+&irqsteer_hdmi {
+	status = "disabled";
+};
+
+&hdmi_blk_ctrl {
+	status = "disabled";
+};
+
+&hdmi_pavi {
+	status = "disabled";
+};
+
+&hdmi {
+	status = "disabled";
+};
+
+&hdmiphy {
+	status = "disabled";
+};
+
+&lcdif3 {
+	status = "disabled";
+	thres-low  = <1 2>;             /* (FIFO * 1 / 2) */
+	thres-high = <3 4>;             /* (FIFO * 3 / 4) */
 };
 
