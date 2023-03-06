@@ -44,18 +44,6 @@
 		};
 	};
 
-	gpio-keys {
-		compatible = "gpio-keys";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_gpio_keys>;
-
-		power-on {
-			label = "PowerOn";
-			gpios = <&gpiof 31 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_POWER>;
-		};
-	};
-
 	memory@40000000 {
 		device_type = "memory";
 		reg = <0x0 0x80000000 0 0x80000000>;
@@ -395,7 +383,7 @@
 	srp-disable;
 	adp-disable;
 	over-current-active-low;
-	status = "okay";
+	status = "disabled";
 };
 
 &usbphy1 {
@@ -434,6 +422,18 @@
 	no-mmc-hs400;
 	non-removable;
 	bus-width = <8>;
+	status = "okay";
+};
+
+&usdhc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc1>;
+	cd-gpios = <&gpiod 16 GPIO_ACTIVE_LOW>;
+	max-frequency = <50000000>;
+	bus-width = <4>;
+	no-1-8-v;
+	pm-ignore-notify;
+	keep-power-in-suspend;
 	status = "okay";
 };
 
@@ -493,12 +493,6 @@
 		>;
 	};
 
-	pinctrl_gpio_keys: gpiokeys {
-		fsl,pins = <
-			MX8ULP_PAD_PTF31__PTF31		0x3
-		>;
-	};
-
 	pinctrl_lpuart5: lpuart5grp {
 		fsl,pins = <
 			MX8ULP_PAD_PTE6__LPUART5_TX	0x3
@@ -542,6 +536,19 @@
 			MX8ULP_PAD_PTD3__SDHC0_D7	0x3
 		>;
 	};
+
+	pinctrl_usdhc1: usdhc1grp {
+		fsl,pins = <
+			MX8ULP_PAD_PTF3__SDHC1_CMD	0x3
+			MX8ULP_PAD_PTF2__SDHC1_CLK	0x10002
+			MX8ULP_PAD_PTF1__SDHC1_D0	0x3
+			MX8ULP_PAD_PTF0__SDHC1_D1	0x3
+			MX8ULP_PAD_PTF4__SDHC1_D3	0x3
+			MX8ULP_PAD_PTF5__SDHC1_D2	0x3
+			MX8ULP_PAD_PTD16__PTD16		0x3
+		>;
+	};
+
 };
 
 &cameradev {
