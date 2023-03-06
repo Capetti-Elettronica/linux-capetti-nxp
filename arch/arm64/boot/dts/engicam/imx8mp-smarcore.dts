@@ -25,6 +25,10 @@
 		};
 	};
 
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+
 	chosen {
 		stdout-path = &uart2;
 	};
@@ -454,11 +458,6 @@
 		reset-gpios= <&gpio1 13 GPIO_ACTIVE_LOW>;
 	};
 
-	pcf8523: rtc@68 {
-		compatible = "nxp,pcf8523";
-		reg = <0x68>;
-	};
-
 	sgtl5000: codec@a {
 			compatible = "fsl,sgtl5000";
 			status = "okay";
@@ -538,6 +537,18 @@
 				clock-lanes = <0>;
 			};
 		};
+	};
+};
+
+&i2c6 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c6>;
+	status = "okay";
+
+	pcf8523: rtc@68 {
+		compatible = "nxp,pcf8523";
+		reg = <0x68>;
 	};
 };
 
@@ -987,6 +998,13 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI5_RXD0__I2C5_SCL			0x400001c3
 			MX8MP_IOMUXC_SAI5_MCLK__I2C5_SDA			0x400001c3
+		>;
+	};
+
+	pinctrl_i2c6: i2c6grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SAI5_RXFS__I2C6_SCL 0x400001c2
+			MX8MP_IOMUXC_SAI5_RXC__I2C6_SDA 0x400001c2
 		>;
 	};
 
