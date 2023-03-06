@@ -668,7 +668,7 @@
 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
 	vmmc-supply = <&reg_usdhc2_vmmc>;
  	no-1-8-v;
-  max-frequency = <35000000>;
+	max-frequency = <35000000>;
 	bus-width = <4>;
 	status = "okay";
 };
