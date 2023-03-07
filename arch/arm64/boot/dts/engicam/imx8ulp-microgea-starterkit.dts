@@ -332,6 +332,16 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	status = "okay";
+
+	polytouch: edt-ft5x26@38 {
+		compatible = "edt,edt-ft5x26";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_edt_ft5x06>;
+		interrupt-parent = <&rpmsg_gpioc>;
+		interrupts = <9 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios= <&gpiof 29 GPIO_ACTIVE_LOW>;
+	};
 };
 
 &imx8ulp_cm33 {
@@ -441,6 +451,12 @@
 	pinctrl_dsi: dsigrp {
 		fsl,pins = <
 			MX8ULP_PAD_PTF8__PTF8		0x3
+		>;
+	};
+
+	pinctrl_edt_ft5x06: edtft5x06grp{
+		fsl,pins = <
+			MX8ULP_PAD_PTF29__PTF29 0x3
 		>;
 	};
 
