@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2021 Engicam srl
+ * Copyright 2019 NXP
+ */
+
+#include "imx8mm-icore-ctouch2.dts"
+
+/ {
+	model = "Engicam i.Core MX8MM CTOUCH2.0 + Second UART 232";
+};
+
+&uart4 { /* RS232 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart4>;
+	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
+	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
+	status = "okay";
+};
+
+
+&iomuxc {
+	pinctrl-names = "default";
+
+	icore-imx8mm {
+		pinctrl_uart4: uart4grp {
+			fsl,pins = <
+				MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
+				MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
+			>;
+		};
+
+  };
+};
