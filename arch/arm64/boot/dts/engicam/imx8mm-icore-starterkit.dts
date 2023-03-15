@@ -112,8 +112,10 @@
 			regulator-name = "WLAN_EN";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio3 23 1>;
+			gpio = <&gpio3 23 GPIO_ACTIVE_HIGH>;
+			enable-active-high;
 			always-on;
+			vin-supply = <&reg_bt>;
 		};
 
 		reg_bt: bt_regulator {
@@ -122,6 +124,7 @@
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 			gpio = <&gpio3 22 1>;
+			enable-active-high;
 			always-on;
 		};
 	};
@@ -336,7 +339,7 @@
 	vmmc-supply = <&reg_sd2_vmmc>;
 	keep-power-in-suspend;
 	max-frequency = <20000000>;
-	non-removable;
+	broken-cd;
 	no-1-8-v;
 	pm-ignore-notify;
 	status = "okay";
@@ -869,28 +872,6 @@
 				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d0
 				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d0
 				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d0
-			>;
-		};
-
-		pinctrl_usdhc2_100mhz: usdhc2grp100mhz {
-			fsl,pins = <
-				MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x194
-				MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d4
-				MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d4
-				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d4
-				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
-				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
-			>;
-		};
-
-		pinctrl_usdhc2_200mhz: usdhc2grp200mhz {
-			fsl,pins = <
-				MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x196
-				MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d6
-				MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d6
-				MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d6
-				MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
-				MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
 			>;
 		};
 
