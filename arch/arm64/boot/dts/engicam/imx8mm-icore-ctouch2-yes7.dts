@@ -1,6 +1,6 @@
 /*
- * Copyright 2020 Engicam srl
- * Copyright 2018 NXP
+ * Copyright 2021 Engicam srl
+ * Copyright 2019 NXP
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -14,99 +14,89 @@
  */
 
 #include "imx8mm-icore-ctouch2.dts"
+
 / {
+	model = "Engicam i.Core MX8MM CTOUCH2.0 + AMP10";
 
-	model = "Engicam i.Core MX8MM CTOUCH2.0 + YES7";
+	panel {
+		compatible = "panel-lvds";
+		backlight = <&backlight_lvds>;
+		data-mapping = "vesa-24";
+		height-mm = <136>;
+		width-mm = <217>;
+		status = "okay";
 
-  gpio_export {
-		compatible = "gpio-export";
-		#size-cells = <0>;
+		panel-timing {
+			clock-frequency = <50000000>;
+			hactive = <1024>;
+			vactive = <600>;
+			hback-porch = <60>;
+			hfront-porch = <50>;
+			vback-porch = <2>;
+			vfront-porch = <3>;
+			hsync-len = <20>;
+			vsync-len = <1>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <0>;
+		};
 
-    GPIO_EX {
-      gpio-export,name = "GPIO_EX";
-      gpio-export,output = <0>;
-      gpios = <&gpio4 26 0>;  
-    };
-  };
+		port {
+			panel_in_lvds: endpoint {
+			remote-endpoint = <&sn65dsi83_out>;
+			};
+		};
+	};
 };
 
-&i2c2 {
+&mipi_dsi {
 	status = "okay";
 
-	polytouch: edt-ft5x26@38 {
-		compatible = "edt,edt-ft5x26";
-		reg = <0x38>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&edt_ft5x06_pins>;
-		interrupt-parent = <&gpio3>;
-		interrupts = <25 IRQ_TYPE_EDGE_FALLING>;
-		reset-gpios= <&gpio1 4 GPIO_ACTIVE_LOW>;
+	port@2 {
+		dsim_to_sn65dsi8: endpoint {
+			remote-endpoint = <&sn65dsi83_in>;
+			attach-bridge;
+		};
 	};
 };
 
 &i2c4 {
-  clock-frequency = <100000>;
-  pinctrl-names = "default";
-  pinctrl-0 = <&pinctrl_i2c4>;
-  status = "okay";
-
-  lvds_bridge: sn65dsi83@2c {
-    compatible = "ti,sn65dsi83";
-    reg = <0x2c>;
-    ti,dsi-lanes = <2>;
-    ti,lvds-format = <2>;
-    ti,lvds-bpp = <24>;
-    ti,lvds-channels = <1>;
-    ti,width-mm = <149>;
-    ti,height-mm = <93>;
-    enable-gpios = <&gpio3 9  GPIO_ACTIVE_HIGH>;
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_dsi_lvds_bridge>;
-    status = "okay";
-
-    display-timings {
-        native-mode = <&timing1>;
-        timing1: hsd100pxn1 {
-        clock-frequency = <50000000>;
-        hactive = <1024>;
-        vactive = <600>;
-        hback-porch = <60>;
-        hfront-porch = <50>;
-        vback-porch = <2>;
-        vfront-porch = <3>;
-        hsync-len = <20>;
-        vsync-len = <1>;
-        hsync-active = <0>;
-        vsync-active = <0>;
-        de-active = <1>;
-        pixelclk-active = <0>;
-        };
-    };
-
-    port {
-      sn65dsi83_in: endpoint {
-        remote-endpoint = <&dsim_to_sn65dsi8>;
-      };
-    };
-  };
-};
-
-
-&iomuxc {
+	clock-frequency = <100000>;
 	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c4>;
+	status = "okay";
 
-	icore-imx8mm {
-    edt_ft5x06_pins: edt-ft5x06-pins-grp{
-		  fsl,pins = <
-        MX8MM_IOMUXC_SAI5_MCLK_GPIO3_IO25 0x19
-        MX8MM_IOMUXC_GPIO1_IO04_GPIO1_IO4 0x19
-		  >;
-    };
-		
-    pinctrl_hog_1: hoggrp-1 {
-      fsl,pins = <
-        MX8MM_IOMUXC_SAI2_TXD0_GPIO4_IO26 0x19
-      >;
-    };
-  };
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	lvds_bridge: sn65dsi83@2c {
+		compatible = "ti,sn65dsi83";
+		reg = <0x2c>;
+
+		enable-gpios = <&gpio3 9 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dsi_lvds_bridge>;
+		status = "okay";
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				sn65dsi83_in: endpoint {
+					remote-endpoint = <&dsim_to_sn65dsi8>;
+					data-lanes = <1 2 3 4>;
+				};
+			};
+
+			port@2 {
+				reg = <2>;
+				sn65dsi83_out: endpoint {
+					remote-endpoint = <&panel_in_lvds>;
+				};
+			};
+		};
+	};
 };
+
