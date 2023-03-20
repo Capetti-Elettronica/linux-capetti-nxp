@@ -25,6 +25,10 @@
 		};
 	};
 
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+
 	chosen {
 		stdout-path = &uart2;
 	};
