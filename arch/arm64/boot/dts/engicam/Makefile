@@ -14,5 +14,6 @@ dtb-$(CONFIG_ARCH_MXC) += \
 			  imx8mp-icore-starterkit.dtb \
 			  imx8mp-icore-fasteth-starterkit.dtb \
 			  imx8mp-icore-ctouch2.dtb \
-			  imx93-icore-starterkit.dtb
+			  imx93-icore-starterkit.dtb \
+			  imx8ulp-microgea-starterkit.dtb
 
