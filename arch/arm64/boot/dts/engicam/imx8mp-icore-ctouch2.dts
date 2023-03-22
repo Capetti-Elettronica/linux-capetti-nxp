@@ -34,34 +34,6 @@
 			gpio-export,output = <1>;
 			gpios = <&gpio4 27 0>;
 		};
-
-		GPIO_A {
-			gpio-export,name = "GPIO_A";
-			gpio-export,output = <0>;
-			gpio-export,direction_may_change;
-			gpios = <&gpio1 3 0>;
-		};
-
-		/*GPIO_B {
-			gpio-export,name = "GPIO_B";
-			gpio-export,output = <0>;
-			gpio-export,direction_may_change;
-			gpios = <&gpio1 4 0>;
-		};*/
-
-		GPIO_C {
-			gpio-export,name = "GPIO_C";
-			gpio-export,output = <0>;
-			gpio-export,direction_may_change;
-			gpios = <&gpio1 7 0>;
-		};
-
-		GPIO_D {
-			gpio-export,name = "GPIO_D";
-			gpio-export,output = <0>;
-			gpio-export,direction_may_change;
-			gpios = <&gpio1 8 0>;
-		};
 	};
 
 	wl_reg_on: regulator-wlregon {
@@ -140,10 +112,6 @@
 			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000149
 		//	MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27 0x119 // LCD ENABLE
 		//	MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22 0x19 // HUB RESET
-			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03  0x119 // GPIO_A
-		//	MX8MP_IOMUXC_GPIO1_IO04__GPIO1_IO04  0x119 // GPIO_B
-			MX8MP_IOMUXC_GPIO1_IO07__GPIO1_IO07  0x119 // GPIO_C
-			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08  0x119  // GPIO_D
 
 						/*PIN TO BE MANAGED OR NC*/
 			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06	0x140 /* RGMII_INT */
@@ -153,35 +121,6 @@
 			MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA			0x1C2 /* I2C4_SDA */
 			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL			0x1C2 /* I2C4_SCL */
 			MX8MP_IOMUXC_GPIO1_IO10__GPIO1_IO10  	0x119 /* GPIO1_IO10 */
-		>;
-	};
-
-	pinctrl_flexspi0: flexspi0grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_NAND_ALE__FLEXSPI_A_SCLK		0x1c2
-			/*MX8MP_IOMUXC_NAND_CE0_B__FLEXSPI_A_SS0_B	0x82   DELETED
-			MX8MP_IOMUXC_NAND_DATA00__FLEXSPI_A_DATA00	0x82   DELETED*/
-			MX8MP_IOMUXC_NAND_DATA01__FLEXSPI_A_DATA01	0x82
-			MX8MP_IOMUXC_NAND_DATA02__FLEXSPI_A_DATA02	0x82
-			MX8MP_IOMUXC_NAND_DATA03__FLEXSPI_A_DATA03	0x82
-		>;
-	};
-
-	pinctrl_pmic: pmicgrp {
-		fsl,pins = <
-			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01	0x000001c0
-		>;
-	};
-
-	pinctrl_sai3: sai3grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_SAI3_TXFS__AUDIOMIX_SAI3_TX_SYNC	0x1d6
-			MX8MP_IOMUXC_SAI3_TXC__AUDIOMIX_SAI3_TX_BCLK	0x1d6
-			MX8MP_IOMUXC_SAI3_RXD__AUDIOMIX_SAI3_RX_DATA00	0x1d6
-			MX8MP_IOMUXC_SAI3_TXD__AUDIOMIX_SAI3_TX_DATA00	0x1d6
-#ifndef SGTL_MCLK_ON_PWM4
-			MX8MP_IOMUXC_SAI3_MCLK__AUDIOMIX_SAI3_MCLK	0x1d6
-#endif
 		>;
 	};
 };
