@@ -195,6 +195,23 @@
 			"LINPUT3", "MICB";
 		status = "okay";
 	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		DISP_BIT_MODE {
+			gpio-export,name = "DISP_BIT_MODE";
+			gpio-export,output = <0>;
+			gpios = <&gpiof 31 0>;
+		};
+
+		LCD_ALIM_EN {
+			gpio-export,name = "LCD_ALIM_EN";
+			gpio-export,output = <1>;
+			gpios = <&rpmsg_gpioc 17 0>;
+		};
+	};
 };
 
 &clock_ext_ts {
@@ -342,9 +359,6 @@
 	pinctrl-0 = <&pinctrl_lpi2c4>;
 	pinctrl-1 = <&pinctrl_lpi2c4>;
 	status = "okay";
-
-	pinctrl-assert-gpios = <&gpiof 31 GPIO_ACTIVE_LOW>,
-							<&rpmsg_gpioc 17 GPIO_ACTIVE_HIGH>;
 
 	polytouch: edt-ft5x26@38 {
 		compatible = "edt,edt-ft5x26";
