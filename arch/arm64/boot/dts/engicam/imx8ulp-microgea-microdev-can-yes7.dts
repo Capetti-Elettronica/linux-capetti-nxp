@@ -212,6 +212,15 @@
 			gpios = <&rpmsg_gpioc 17 0>;
 		};
 	};
+
+	wl_reg_on: regulator-wlregon {
+		compatible = "regulator-fixed";
+		regulator-name = "WL_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&rpmsg_gpioc 9 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 };
 
 &clock_ext_ts {
@@ -473,6 +482,25 @@
 	status = "okay";
 };
 
+&usdhc2 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc2>;
+	bus-width = <4>;
+	no-1-8-v;
+	pm-ignore-notify;
+	keep-power-in-suspend;
+	non-removable;
+	vmmc-supply = <&wl_reg_on>;
+	status = "okay";
+
+	brcmf: bcrmf@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
+	};
+};
+
 &iomuxc1 {
 
 	pinctrl_edt_ft5x06: edtft5x06grp{
@@ -590,6 +618,17 @@
 			MX8ULP_PAD_PTF4__SDHC1_D3	0x3
 			MX8ULP_PAD_PTF5__SDHC1_D2	0x3
 			MX8ULP_PAD_PTD16__PTD16		0x3
+		>;
+	};
+
+	pinctrl_usdhc2: usdhc2grp {
+		fsl,pins = <
+			MX8ULP_PAD_PTD17__SDHC2_CMD	0x3
+			MX8ULP_PAD_PTF17__SDHC2_CLK	0x10002
+			MX8ULP_PAD_PTD15__SDHC2_D0	0x3
+			MX8ULP_PAD_PTD14__SDHC2_D1	0x3
+			MX8ULP_PAD_PTD13__SDHC2_D2	0x3
+			MX8ULP_PAD_PTD12__SDHC2_D3	0x3
 		>;
 	};
 
