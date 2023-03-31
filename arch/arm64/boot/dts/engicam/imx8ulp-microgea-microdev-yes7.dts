@@ -10,7 +10,7 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	model = "Engicam i.MX8ULP MICROGEA starterkit";
+	model = "Engicam i.MX8ULP MICROGEA MICRODEV yes7";
 	compatible = "fsl,imx8ulp-evk", "fsl,imx8ulp";
 
 	chosen {
@@ -195,6 +195,32 @@
 			"LINPUT3", "MICB";
 		status = "okay";
 	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		DISP_BIT_MODE {
+			gpio-export,name = "DISP_BIT_MODE";
+			gpio-export,output = <0>;
+			gpios = <&gpiof 31 0>;
+		};
+
+		LCD_ALIM_EN {
+			gpio-export,name = "LCD_ALIM_EN";
+			gpio-export,output = <1>;
+			gpios = <&rpmsg_gpioc 17 0>;
+		};
+	};
+
+	wl_reg_on: regulator-wlregon {
+		compatible = "regulator-fixed";
+		regulator-name = "WL_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&rpmsg_gpioc 9 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 };
 
 &clock_ext_ts {
@@ -332,6 +358,16 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	status = "okay";
+};
+
+&lpi2c4 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <400000>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&pinctrl_lpi2c4>;
+	pinctrl-1 = <&pinctrl_lpi2c4>;
+	status = "okay";
 
 	polytouch: edt-ft5x26@38 {
 		compatible = "edt,edt-ft5x26";
@@ -339,8 +375,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_edt_ft5x06>;
 		interrupt-parent = <&rpmsg_gpioc>;
-		interrupts = <9 IRQ_TYPE_EDGE_FALLING>;
-		reset-gpios= <&gpiof 29 GPIO_ACTIVE_LOW>;
+		interrupts = <8 IRQ_TYPE_EDGE_FALLING>;
 	};
 };
 
@@ -365,7 +400,7 @@
 };
 
 &lpuart6 {
-	/* BT */
+	/* RS485 */
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&pinctrl_lpuart6>;
 	pinctrl-1 = <&pinctrl_lpuart6>;
@@ -447,16 +482,30 @@
 	status = "okay";
 };
 
-&iomuxc1 {
-	pinctrl_dsi: dsigrp {
-		fsl,pins = <
-			MX8ULP_PAD_PTF8__PTF8		0x3
-		>;
+&usdhc2 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc2>;
+	bus-width = <4>;
+	no-1-8-v;
+	pm-ignore-notify;
+	keep-power-in-suspend;
+	non-removable;
+	vmmc-supply = <&wl_reg_on>;
+	status = "okay";
+
+	brcmf: bcrmf@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
 	};
+};
+
+&iomuxc1 {
 
 	pinctrl_edt_ft5x06: edtft5x06grp{
 		fsl,pins = <
-			MX8ULP_PAD_PTF29__PTF29 0x3
+			MX8ULP_PAD_PTF31__PTF31 0x3
 		>;
 	};
 
@@ -525,6 +574,13 @@
 		>;
 	};
 
+	pinctrl_lpi2c4: lpi2c4grp {
+		fsl,pins = <
+			MX8ULP_PAD_PTF8__LPI2C4_SCL	0x20
+			MX8ULP_PAD_PTF9__LPI2C4_SDA	0x20
+		>;
+	};
+
 	pinctrl_otgid1: usb1grp {
 		fsl,pins = <
 			MX8ULP_PAD_PTF2__USB0_ID	0x10003
@@ -562,6 +618,17 @@
 			MX8ULP_PAD_PTF4__SDHC1_D3	0x3
 			MX8ULP_PAD_PTF5__SDHC1_D2	0x3
 			MX8ULP_PAD_PTD16__PTD16		0x3
+		>;
+	};
+
+	pinctrl_usdhc2: usdhc2grp {
+		fsl,pins = <
+			MX8ULP_PAD_PTD17__SDHC2_CMD	0x3
+			MX8ULP_PAD_PTF17__SDHC2_CLK	0x10002
+			MX8ULP_PAD_PTD15__SDHC2_D0	0x3
+			MX8ULP_PAD_PTD14__SDHC2_D1	0x3
+			MX8ULP_PAD_PTD13__SDHC2_D2	0x3
+			MX8ULP_PAD_PTD12__SDHC2_D3	0x3
 		>;
 	};
 
