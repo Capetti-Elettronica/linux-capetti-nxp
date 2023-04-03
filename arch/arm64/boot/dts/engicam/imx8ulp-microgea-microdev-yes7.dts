@@ -211,6 +211,12 @@
 			gpio-export,output = <1>;
 			gpios = <&rpmsg_gpioc 17 0>;
 		};
+
+		EMMC_EN {
+			gpio-export,name = "EMMC_EN";
+			gpio-export,output = <1>;
+			gpios = <&rpmsg_gpioa 15 0>;
+		};
 	};
 
 	wl_reg_on: regulator-wlregon {
