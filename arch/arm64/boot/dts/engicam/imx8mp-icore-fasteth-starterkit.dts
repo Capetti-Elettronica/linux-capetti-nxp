@@ -8,7 +8,7 @@
 #include "imx8mp-icore-starterkit.dts"
 
 / {
-	model = "Engicam i.MX8MPlus DimSport - Fasteth ";
+	model = "Engicam i.Core i.MX8MPlus Fasteth StarterKit (459B)";
 
 
  	gpio_export {
