@@ -1,0 +1,127 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 Engicam
+ */
+
+/dts-v1/;
+
+#include <dt-bindings/usb/pd.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "imx8mp-icore-fasteth-starterkit.dts"
+
+#define SGTL_MCLK_ON_PWM4
+
+/ {
+	model = "Engicam i.Core i.MX8MPlus Fasteth CTouch 2.0";
+	compatible = "engi,imx8-icore", "fsl,imx8mp";
+
+	aliases {
+		rtc1 = &snvs_rtc;
+	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		OTG {
+			gpio-export,name = "otg";
+			gpio-export,output = <0>;
+			gpios = <&gpio1 10 0>;
+		};
+
+		LCD_ENABLE {
+			gpio-export,name = "lcd_enable";
+			gpio-export,output = <1>;
+			gpios = <&gpio4 27 0>;
+		};
+	};
+
+	wl_reg_on: regulator-wlregon {
+		compatible = "regulator-fixed";
+		regulator-name = "WL_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		vin-supply = <&bt_reg_on>;
+	};
+
+	bt_reg_on: regulator-btregon {
+		compatible = "regulator-fixed";
+		regulator-name = "BT_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+};
+
+&lvds_backlight {
+	status = "disabled";
+};
+
+&panel_lvds {
+	status = "disabled";
+};
+
+&pwm2 {
+	status = "disabled";
+};
+
+&ecspi2 {
+	status = "disabled";
+};
+
+&i2c2 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c2>;
+	status = "okay";
+
+	pcf8563: rtc@51 {
+		compatible = "nxp,pcf8563";
+		reg = <0x51>;
+	};
+};
+
+&flexcan1 {
+	status = "disabled";
+};
+
+&ldb {
+	status = "disabled";
+};
+
+&ldb_phy {
+	status = "disabled";
+};
+
+&mipi_csi_0 {
+	status = "disabled";
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>;
+
+	pinctrl_hog: hoggrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL	0x400001c3
+			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
+			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000119
+			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000149
+		//	MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27 0x119 // LCD ENABLE
+		//	MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22 0x19 // HUB RESET
+
+						/*PIN TO BE MANAGED OR NC*/
+			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06	0x140 /* RGMII_INT */
+			MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x140 /* UART3_RTS_IN */
+			MX8MP_IOMUXC_UART4_TXD__GPIO5_IO29		0x140 /* UART4_TXD */
+			MX8MP_IOMUXC_UART4_RXD__GPIO5_IO28		0x140 /* UART4_RXD */
+			MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA			0x1C2 /* I2C4_SDA */
+			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL			0x1C2 /* I2C4_SCL */
+			MX8MP_IOMUXC_GPIO1_IO10__GPIO1_IO10  	0x119 /* GPIO1_IO10 */
+		>;
+	};
+};
+
