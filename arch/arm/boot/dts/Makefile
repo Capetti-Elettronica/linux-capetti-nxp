@@ -706,7 +706,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ull-microgea-microdev-rev3.dtb \
 	imx6ull-gea-starterkit.dtb \
 	imx6ull-gea-loco7res.dtb \
-	imx6ull-gea-mmc-starterkit.dtb
+	imx6ull-gea-emmc-starterkit.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
 	imx7d-cl-som-imx7.dtb \
 	imx7d-colibri-aster.dtb \
