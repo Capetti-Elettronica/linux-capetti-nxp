@@ -155,6 +155,9 @@
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
+	fsl,uart-has-rtscts;
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
 	status = "ok";
 };
 
