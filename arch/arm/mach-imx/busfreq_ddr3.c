@@ -642,7 +642,7 @@ int init_mmdc_ddr3_settings_imx6_smp(struct platform_device *busfreq_pdev)
 
 	if (cpu_is_imx6q())
 		ddr_settings_size = ARRAY_SIZE(ddr3_dll_mx6q) +
-			ARRAY_SIZE(ddr3_calibration);
+			ARRAY_SIZE(ddr3_calibration_icore);
 	if (cpu_is_imx6dl())
 		ddr_settings_size = ARRAY_SIZE(ddr3_dll_mx6dl) +
 			ARRAY_SIZE(ddr3_calibration_icore);
@@ -652,7 +652,7 @@ int init_mmdc_ddr3_settings_imx6_smp(struct platform_device *busfreq_pdev)
 		memcpy(normal_mmdc_settings, ddr3_dll_mx6q,
 			sizeof(ddr3_dll_mx6q));
 		memcpy(((char *)normal_mmdc_settings + sizeof(ddr3_dll_mx6q)),
-			ddr3_calibration, sizeof(ddr3_calibration));
+			ddr3_calibration_icore, sizeof(ddr3_calibration_icore));
 	}
 	if (cpu_is_imx6dl()) {
 		memcpy(normal_mmdc_settings, ddr3_dll_mx6dl,

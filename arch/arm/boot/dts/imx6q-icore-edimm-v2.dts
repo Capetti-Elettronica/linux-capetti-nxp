@@ -1,0 +1,227 @@
+/*
+ * Copyright (C) 2013 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+
+#include "imx6q.dtsi"
+#include "imx6qdl-icore.dtsi"
+
+/ {
+	model = "Engicam i.CoreM6 DualLite/Solo starterkit";
+	compatible = "fsl,imx6-icore", "fsl,imx6q";
+
+	aliases {
+		mxcfb0 = &mxcfb1;
+		mxcfb1 = &mxcfb2;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_leds>;
+
+		led-1 {
+			label = "led-1";
+			gpios = <&gpio5 30 GPIO_ACTIVE_HIGH>;
+			default-sate = "on";
+		};
+
+		led-2 {
+			label = "led-2";
+			gpios = <&gpio5 22 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+	};
+
+	wl_reg_on: regulator-wlregon {
+		compatible = "regulator-fixed";
+		regulator-name = "WL_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio6 3 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <100>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
+	bt_reg_on: regulator-btregon {
+		compatible = "regulator-fixed";
+		regulator-name = "BT_REG_ON";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio6 2 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <100>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
+	mxcfb1: fb@0 {
+		compatible = "fsl,mxc_sdc_fb";
+		disp_dev = "ldb";
+		interface_pix_fmt = "RGB24";
+		default_bpp = <32>;
+		int_clk = <0>;
+		late_init = <0>;
+		status = "okay";
+	};
+
+	mxcfb2: fb@1 {
+		status = "disabled";
+	};
+};
+
+&ldb {
+	status = "okay";
+
+	lvds-channel@0 {
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <24>;
+		primary;
+		crtc = "ipu1-di0";
+		status = "okay";
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+				clock-frequency = <65000000>;
+				hactive = <1024>;
+				vactive = <600>;
+				hback-porch = <160>;
+				hfront-porch = <20>;
+				vback-porch = <29>;
+				vfront-porch = <3>;
+				hsync-len = <136>;
+				vsync-len = <6>;
+			};
+		};
+	};
+};
+
+&i2c2 {
+
+	hdmi_out: edid@50 {
+		compatible = "fsl,imx6-hdmi-i2c";
+		reg = <0x50>;
+	};
+};
+
+&sgtl5000 {
+	VDDA-supply = <&reg_3p3v>;
+};
+
+&i2c3 {
+
+	polytouch: edt-ft5x06@38 {
+		compatible = "edt,edt-ft5x26";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		interrupt-parent = <&gpio5>;
+		interrupts = <31 0>;
+	};
+};
+
+/* Wifi */
+&usdhc2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc2>;
+	no-1-8-v;
+	pm-ignore-notify;
+	keep-power-in-suspend;
+	non-removable;
+	vmmc-supply = <&wl_reg_on>;
+	status = "ok";
+
+	brcmfm: brcmfm@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
+	};
+};
+
+/* RS232 */
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>;
+	status = "ok";
+};
+
+/* RS485 */
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "ok";
+};
+
+&can1 {
+	status = "ok";
+};
+
+&can2 {
+	status = "ok";
+};
+
+&pcie {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pcie>;
+	reset-gpio = <&gpio6 4 GPIO_ACTIVE_LOW>;
+	status = "ok";
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>;
+
+	pinctrl_leds: leds-grp {
+		fsl,pins = <
+			MX6QDL_PAD_CSI0_DAT12__GPIO5_IO30	0x1b0b0
+			MX6QDL_PAD_CSI0_DAT4__GPIO5_IO22	0x1b0b0
+		>;
+	};
+
+	pinctrl_usdhc2: lwb4500152-wifi-grp {
+		fsl,pins = <
+			MX6QDL_PAD_SD2_CLK__SD2_CLK		0x10051
+			MX6QDL_PAD_SD2_CMD__SD2_CMD		0x17058
+			MX6QDL_PAD_SD2_DAT0__SD2_DATA0		0x17058
+			MX6QDL_PAD_SD2_DAT1__SD2_DATA1		0x17058
+			MX6QDL_PAD_SD2_DAT2__SD2_DATA2		0x17058
+			MX6QDL_PAD_SD2_DAT3__SD2_DATA3		0x17058
+		>;
+	};
+
+	pinctrl_uart2: uart2-grp {
+		fsl,pins = <
+			MX6QDL_PAD_EIM_D26__UART2_TX_DATA	0x1b0b0
+			MX6QDL_PAD_EIM_D27__UART2_RX_DATA	0x1b0b0
+		>;
+	};
+
+	pinctrl_uart3: uart3-grp {
+		fsl,pins = <
+			MX6QDL_PAD_EIM_D23__UART3_CTS_B		0x1b0b0
+			MX6QDL_PAD_EIM_D24__UART3_TX_DATA	0x1b0b0
+			MX6QDL_PAD_EIM_D25__UART3_RX_DATA	0x1b0b0
+		>;
+	};
+
+	pinctrl_pcie: pcie-grp {
+		fsl,pins = <
+			MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04	0x1b0b0 /* signal for pcie reset*/
+		>;
+	};
+
+	pinctrl_hog: hoggrp {
+		fsl,pins = <
+			MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x130b0 /* master clock signal for sgtl5000 */
+			MX6QDL_PAD_CSI0_DAT13__GPIO5_IO31	0x1b0b0 /* GPIO for edt-ft5x26 INT signal */
+			MX6QDL_PAD_CSI0_DAT16__GPIO6_IO02	0x1b0b0	/* GPIO for BT_REG_ON */
+			MX6QDL_PAD_CSI0_DAT17__GPIO6_IO03	0x1b0b0 /* GPIO for WL_REG_ON */
+		>;
+	};
+};
