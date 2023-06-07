@@ -214,7 +214,7 @@
 
 		EMMC_EN {
 			gpio-export,name = "EMMC_EN";
-			gpio-export,output = <1>;
+			gpio-export,output = <0>;
 			gpios = <&rpmsg_gpioa 15 0>;
 		};
 	};
