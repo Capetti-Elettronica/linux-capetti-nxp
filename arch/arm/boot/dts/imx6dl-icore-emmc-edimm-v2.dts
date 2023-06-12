@@ -112,8 +112,6 @@
 
 &sgtl5000 {
 	VDDA-supply = <&reg_3p3v>;
-	/delete-property/ dmas;
-	/delete-property/ dma-names;
 };
 
 &i2c3 {
@@ -151,6 +149,10 @@
 	};
 };
 
+&usdhc3 {
+	status = "okay";
+};
+
 /* RS232 */
 &uart2 {
 	pinctrl-names = "default";
@@ -183,6 +185,16 @@
 	pinctrl-0 = <&pinctrl_pcie>;
 	reset-gpio = <&gpio6 4 GPIO_ACTIVE_LOW>;
 	status = "ok";
+};
+
+&fec {
+	clocks = <&clks IMX6QDL_CLK_ENET>,
+			<&clks IMX6QDL_CLK_ENET>,
+			<&clks IMX6QDL_CLK_ENET_REF>;
+	clock-names = "ipg", "ahb", "ptp";
+	/delete-property/ assigned-clocks;
+	/delete-property/ assigned-clocks-rates;
+	/delete-property/ fsl-stop-mode;
 };
 
 &iomuxc {
