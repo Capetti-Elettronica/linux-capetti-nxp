@@ -12,7 +12,7 @@
 #include "imx6qdl-icore.dtsi"
 
 / {
-	model = "Engicam i.CoreM6 DualLite/Solo starterkit";
+	model = "Engicam i.CoreM6 DualLite/Solo eMMC starterkit";
 	compatible = "fsl,imx6-icore", "fsl,imx6q";
 
 	aliases {
@@ -149,6 +149,10 @@
 	};
 };
 
+&usdhc3 {
+	status = "okay";
+};
+
 /* RS232 */
 &uart2 {
 	pinctrl-names = "default";
@@ -181,6 +185,16 @@
 	pinctrl-0 = <&pinctrl_pcie>;
 	reset-gpio = <&gpio6 4 GPIO_ACTIVE_LOW>;
 	status = "ok";
+};
+
+&fec {
+	clocks = <&clks IMX6QDL_CLK_ENET>,
+			<&clks IMX6QDL_CLK_ENET>,
+			<&clks IMX6QDL_CLK_ENET_REF>;
+	clock-names = "ipg", "ahb", "ptp";
+	/delete-property/ assigned-clocks;
+	/delete-property/ assigned-clocks-rates;
+	/delete-property/ fsl-stop-mode;
 };
 
 &iomuxc {
