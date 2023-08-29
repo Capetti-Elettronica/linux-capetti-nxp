@@ -12,7 +12,7 @@
 #include "imx6qdl-icore.dtsi"
 
 / {
-	model = "Engicam i.CoreM6 DualLite/Solo starterkit";
+	model = "Engicam i.CoreM6 Quad starterkit";
 	compatible = "fsl,imx6-icore", "fsl,imx6q";
 
 	aliases {
