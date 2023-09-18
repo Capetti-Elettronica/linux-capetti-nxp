@@ -10,7 +10,7 @@
 
 / {
 	model = "Freescale i.MX6 SoloX Engicam Smarcore";
-	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx";
+	compatible = "fsl,imx6sx-sdb", "fsl,imx6sx", "fsl,imx6sx-smarcore";
 
 	chosen {
 		stdout-path = &uart5;
@@ -94,17 +94,6 @@
 		regulator-always-on;
 	};
 
-	reg_pcie_gpio: regulator-pcie-gpio {
-		compatible = "regulator-fixed";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_pcie_reg>;
-		regulator-name = "MPCIE_3V3";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		gpio = <&gpio2 1 GPIO_ACTIVE_HIGH>;
-		enable-active-high;
-	};
-
 	reg_lcd_5v: regulator-lcd-5v {
 		compatible = "regulator-fixed";
 		regulator-name = "lcd-5v0";
@@ -184,33 +173,18 @@
 	pinctrl-0 = <&pinctrl_enet1>;
 	phy-supply = <&reg_enet_3v3>;
 	phy-mode = "rgmii-id";
-	phy-handle = <&ethphy1>;
-	phy-reset-gpios = <&gpio2 7 GPIO_ACTIVE_LOW>;
-	fsl,magic-packet;
+	fsl,num_tx_queues=<3>;
+	fsl,num_rx_queues=<3>;
 	status = "okay";
-
-	mdio {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		ethphy1: ethernet-phy@1 {
-			reg = <1>;
-			qca,disable-smarteee;
-		};
-
-		ethphy2: ethernet-phy@2 {
-			reg = <2>;
-			qca,disable-smarteee;
-		};
-	};
 };
 
 &fec2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet2>;
+	phy-supply = <&reg_enet_3v3>;
 	phy-mode = "rgmii-id";
-	phy-handle = <&ethphy2>;
-	fsl,magic-packet;
+	fsl,num_tx_queues=<3>;
+	fsl,num_rx_queues=<3>;
 	status = "okay";
 };
 
@@ -258,14 +232,6 @@
 	clock-frequency = <100000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c4>;
-	status = "okay";
-};
-
-&pcie {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pcie>;
-	reset-gpio = <&gpio2 0 GPIO_ACTIVE_LOW>;
-	vpcie-supply = <&reg_pcie_gpio>;
 	status = "okay";
 };
 
@@ -361,12 +327,6 @@
 	status = "okay";
 };
 
-&wdog1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_wdog>;
-	fsl,ext-reset-output;
-};
-
 &iomuxc {
 	imx6x-sdb {
 		pinctrl-names = "default";
@@ -399,21 +359,21 @@
 
 		pinctrl_enet1: enet1grp {
 			fsl,pins = <
-				MX6SX_PAD_ENET1_MDIO__ENET1_MDIO	0xa0b1
-				MX6SX_PAD_ENET1_MDC__ENET1_MDC		0xa0b1
-				MX6SX_PAD_RGMII1_TXC__ENET1_RGMII_TXC	0xa0b9
+				MX6SX_PAD_ENET1_COL__ENET2_MDC		0xa0b1
+				MX6SX_PAD_ENET1_CRS__ENET2_MDIO		0xa0b1
+				MX6SX_PAD_RGMII1_TXC__ENET1_RGMII_TXC	0xa0b1
 				MX6SX_PAD_RGMII1_TD0__ENET1_TX_DATA_0	0xa0b1
 				MX6SX_PAD_RGMII1_TD1__ENET1_TX_DATA_1	0xa0b1
 				MX6SX_PAD_RGMII1_TD2__ENET1_TX_DATA_2	0xa0b1
 				MX6SX_PAD_RGMII1_TD3__ENET1_TX_DATA_3	0xa0b1
 				MX6SX_PAD_RGMII1_TX_CTL__ENET1_TX_EN	0xa0b1
-				MX6SX_PAD_RGMII1_RXC__ENET1_RX_CLK	0x3081
+				MX6SX_PAD_RGMII1_RXC__ENET1_RX_CLK 	0x3081
 				MX6SX_PAD_RGMII1_RD0__ENET1_RX_DATA_0	0x3081
 				MX6SX_PAD_RGMII1_RD1__ENET1_RX_DATA_1	0x3081
 				MX6SX_PAD_RGMII1_RD2__ENET1_RX_DATA_2	0x3081
 				MX6SX_PAD_RGMII1_RD3__ENET1_RX_DATA_3	0x3081
-				MX6SX_PAD_RGMII1_RX_CTL__ENET1_RX_EN	0x3081
-				MX6SX_PAD_ENET2_RX_CLK__ENET2_REF_CLK_25M	0x91
+				MX6SX_PAD_RGMII1_RXC__ENET1_RX_CLK	0x3081
+				MX6SX_PAD_RGMII1_RX_CTL__ENET1_RX_EN 	0x3081
 				/* phy reset */
 				MX6SX_PAD_ENET2_CRS__GPIO2_IO_7		0x10b0
 			>;
@@ -439,6 +399,8 @@
 				MX6SX_PAD_RGMII2_RD2__ENET2_RX_DATA_2	0x3081
 				MX6SX_PAD_RGMII2_RD3__ENET2_RX_DATA_3	0x3081
 				MX6SX_PAD_RGMII2_RX_CTL__ENET2_RX_EN	0x3081
+				/* phy reset */
+				MX6SX_PAD_ENET1_MDIO__GPIO2_IO_3	0x10b0
 			>;
 		};
 
@@ -488,18 +450,6 @@
 			fsl,pins = <
 				MX6SX_PAD_SD2_CLK__MQS_RIGHT 0x120b0
 				MX6SX_PAD_SD2_CMD__MQS_LEFT  0x120b0
-			>;
-		};
-
-		pinctrl_pcie: pciegrp {
-			fsl,pins = <
-				MX6SX_PAD_ENET1_COL__GPIO2_IO_0 0x10b0
-			>;
-		};
-
-		pinctrl_pcie_reg: pciereggrp {
-			fsl,pins = <
-				MX6SX_PAD_ENET1_CRS__GPIO2_IO_1	0x10b0
 			>;
 		};
 

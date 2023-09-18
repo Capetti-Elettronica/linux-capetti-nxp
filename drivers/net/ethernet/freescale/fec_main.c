@@ -21,7 +21,6 @@
  *
  * Copyright (C) 2010-2011 Freescale Semiconductor, Inc.
  */
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -2219,6 +2218,7 @@ static int fec_enet_mii_probe(struct net_device *ndev)
 static int fec_enet_mii_init(struct platform_device *pdev)
 {
 	static struct mii_bus *fec0_mii_bus;
+	static struct mii_bus **fec1_mii_bus_pt;
 	static bool *fec_mii_bus_share;
 	struct net_device *ndev = platform_get_drvdata(pdev);
 	struct fec_enet_private *fep = netdev_priv(ndev);
@@ -2244,15 +2244,27 @@ static int fec_enet_mii_init(struct platform_device *pdev)
 	 * mdio interface in board design, and need to be configured by
 	 * fec0 mii_bus.
 	 */
-	if ((fep->quirks & FEC_QUIRK_SINGLE_MDIO) && fep->dev_id > 0) {
-		/* fec1 uses fec0 mii_bus */
-		if (mii_cnt && fec0_mii_bus) {
-			fep->mii_bus = fec0_mii_bus;
-			*fec_mii_bus_share = true;
-			mii_cnt++;
+	if (of_machine_is_compatible("fsl,imx6sx-smarcore"))
+	{
+		if ((fep->quirks & FEC_QUIRK_ENET_MAC) && fep->dev_id == 0)
+		{
+			/* fec0 uses fec1 mii_bus */
+			fec1_mii_bus_pt = &fep->mii_bus;
 			return 0;
 		}
-		return -ENOENT;
+	}
+	else
+	{
+		if ((fep->quirks & FEC_QUIRK_SINGLE_MDIO) && fep->dev_id > 0) {
+			/* fec1 uses fec0 mii_bus */
+			if (mii_cnt && fec0_mii_bus) {
+				fep->mii_bus = fec0_mii_bus;
+				*fec_mii_bus_share = true;
+				mii_cnt++;
+				return 0;
+			}
+			return -ENOENT;
+		}
 	}
 
 	bus_freq = 2500000; /* 2.5MHz by default */
@@ -2339,10 +2351,17 @@ static int fec_enet_mii_init(struct platform_device *pdev)
 
 	mii_cnt++;
 
-	/* save fec0 mii_bus */
-	if (fep->quirks & FEC_QUIRK_SINGLE_MDIO) {
-		fec0_mii_bus = fep->mii_bus;
-		fec_mii_bus_share = &fep->mii_bus_share;
+	if (of_machine_is_compatible("fsl,imx6sx-smarcore"))
+	{
+		*fec1_mii_bus_pt = fep->mii_bus;
+	}
+	else
+	{
+		/* save fec0 mii_bus */
+		if (fep->quirks & FEC_QUIRK_SINGLE_MDIO) {
+			fec0_mii_bus = fep->mii_bus;
+			fec_mii_bus_share = &fep->mii_bus_share;
+		}
 	}
 
 	return 0;
