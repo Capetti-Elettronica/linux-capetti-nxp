@@ -286,8 +286,7 @@
 
 &usbotg1 {
 	vbus-supply = <&reg_usb_otg1_vbus>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usb_otg1_id>;
+	dr_mode = "host";
 	status = "okay";
 };
 
@@ -509,12 +508,6 @@
 		pinctrl_usb_otg1: usbotg1grp {
 			fsl,pins = <
 				MX6SX_PAD_GPIO1_IO09__GPIO1_IO_9	0x10b0
-			>;
-		};
-
-		pinctrl_usb_otg1_id: usbotg1idgrp {
-			fsl,pins = <
-				MX6SX_PAD_GPIO1_IO10__ANATOP_OTG1_ID	0x17059
 			>;
 		};
 
