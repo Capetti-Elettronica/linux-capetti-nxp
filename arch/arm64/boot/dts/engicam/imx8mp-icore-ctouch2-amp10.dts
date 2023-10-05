@@ -1,7 +1,7 @@
 #include "imx8mp-icore-ctouch2.dts"
 
 / {
-	model = "Engicam i.Core MX8MM CTOUCH2.0 AMP10";
+	model = "Engicam i.Core MX8MP CTOUCH2.0 AMP10";
 
 	lvds_backlight: lvds_backlight {
 		compatible = "pwm-backlight";
