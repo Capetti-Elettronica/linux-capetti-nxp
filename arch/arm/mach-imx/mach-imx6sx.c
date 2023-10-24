@@ -11,6 +11,7 @@
 #include <linux/mfd/syscon/imx6q-iomuxc-gpr.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
+#include <linux/micrel_phy.h>
 
 #include "common.h"
 #include "cpuidle.h"
@@ -30,10 +31,56 @@ static void __init imx6sx_enet_clk_sel(void)
 	}
 }
 
+/* For imx6sx smarcore board: set KSZ9021RN RGMII pad skew */
+static int ksz9021rn_phy_fixup(struct phy_device *phydev)
+{
+	if (IS_BUILTIN(CONFIG_PHYLIB)) {
+		/* min rx data delay */
+		phy_write(phydev, 0x0b, 0x8105);
+		phy_write(phydev, 0x0c, 0x0000);
+
+		/* max rx/tx clock delay, min rx/tx control delay */
+		phy_write(phydev, 0x0b, 0x8104);
+		phy_write(phydev, 0x0c, 0xf0f0);
+		phy_write(phydev, 0x0b, 0x104);
+	}
+
+	return 0;
+}
+
+static void mmd_write_reg(struct phy_device *dev, int device, int reg, int val)
+{
+	phy_write(dev, 0x0d, device);
+	phy_write(dev, 0x0e, reg);
+	phy_write(dev, 0x0d, (1 << 14) | device);
+	phy_write(dev, 0x0e, val);
+}
+
+static int ksz9031rn_phy_fixup(struct phy_device *dev)
+{
+	/*
+	 * min rx data delay, max rx/tx clock delay,
+	 * min rx/tx control delay
+	 */
+	mmd_write_reg(dev, 2, 4, 0);
+	mmd_write_reg(dev, 2, 5, 0);
+	mmd_write_reg(dev, 2, 8, 0x003ff);
+
+	return 0;
+}
+
 static inline void imx6sx_enet_init(void)
 {
 	imx6_enet_mac_init("fsl,imx6sx-fec", "fsl,imx6sx-ocotp");
 	imx6sx_enet_clk_sel();
+
+	if (of_machine_is_compatible("fsl,imx6sx-smarcore"))
+	{
+		phy_register_fixup_for_uid(PHY_ID_KSZ9021, MICREL_PHY_ID_MASK,
+				ksz9021rn_phy_fixup);
+		phy_register_fixup_for_uid(PHY_ID_KSZ9031, MICREL_PHY_ID_MASK,
+				ksz9031rn_phy_fixup);
+	}
 }
 
 static void __init imx6sx_init_machine(void)
