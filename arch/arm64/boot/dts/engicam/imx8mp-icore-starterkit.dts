@@ -1002,27 +1002,27 @@
 };
 
 &irqsteer_hdmi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmi_blk_ctrl {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmi_pavi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmiphy {
-	status = "disabled";
+	status = "okay";
 };
 
 &lcdif3 {
-	status = "disabled";
+	status = "okay";
 	thres-low  = <1 2>;             /* (FIFO * 1 / 2) */
 	thres-high = <3 4>;             /* (FIFO * 3 / 4) */
 };
