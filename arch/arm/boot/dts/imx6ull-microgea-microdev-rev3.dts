@@ -130,25 +130,25 @@
 			gpio-export,name = "NEW_INPUT_0";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 25 1>; 
-		}	
+		};	
 
 		NEW_INPUT_1 {
 			gpio-export,name = "NEW_INPUT_1";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 26 1>; 
-		}	
+		};	
 
 		NEW_INPUT_2 {
 			gpio-export,name = "NEW_INPUT_2";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 27 1>; 
-		}	
+		};	
 
 		NEW_INPUT_3 {
 			gpio-export,name = "NEW_INPUT_3";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 28 1>; 
-		}		
+		};		
 	};
 };
 
