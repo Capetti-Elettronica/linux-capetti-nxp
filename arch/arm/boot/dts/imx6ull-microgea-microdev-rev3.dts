@@ -124,7 +124,31 @@
 			gpio-export,name = "UMTS_STATUS";
 			gpio-export,input = <1>;
 			gpios = <&gpio5 4 0>;
-		};		
+		};
+
+		NEW_INPUT_0 {
+			gpio-export,name = "NEW_INPUT_0";
+			gpio-export,input = <0>;
+			gpios = <&gpio4 25 1>; 
+		}	
+
+		NEW_INPUT_1 {
+			gpio-export,name = "NEW_INPUT_1";
+			gpio-export,input = <0>;
+			gpios = <&gpio4 26 1>; 
+		}	
+
+		NEW_INPUT_2 {
+			gpio-export,name = "NEW_INPUT_2";
+			gpio-export,input = <0>;
+			gpios = <&gpio4 27 1>; 
+		}	
+
+		NEW_INPUT_3 {
+			gpio-export,name = "NEW_INPUT_3";
+			gpio-export,input = <0>;
+			gpios = <&gpio4 28 1>; 
+		}		
 	};
 };
 
@@ -208,6 +232,10 @@
 				MX6UL_PAD_SNVS_TAMPER5__GPIO5_IO05		0x1b0b0 /* UMTS_ON */
 				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25		0x1b0b0 /* UMTS_RESET */
 				MX6UL_PAD_SNVS_TAMPER4__GPIO5_IO04		0x1b0b0 /* UMTS_STATUS */
+				MX6UL_PAD_CSI_DATA04__GPIO4_IO25		0x1b0b0 /* NEW_INPUT_0 */
+				MX6UL_PAD_CSI_DATA05__GPIO4_IO26		0x1b0b0 /* NEW_INPUT_1 */
+				MX6UL_PAD_CSI_DATA06__GPIO4_IO27		0x1b0b0 /* NEW_INPUT_2 */
+				MX6UL_PAD_CSI_DATA07__GPIO4_IO28		0x1b0b0 /* NEW_INPUT_3 */
 			>;
 		};
 		
@@ -338,14 +366,14 @@
 			>;
 		};
 
-		pinctrl_ecspi: ecspigrp {
-			fsl,pins = <
-				MX6UL_PAD_CSI_DATA04__ECSPI1_SCLK      	0x70a1
-				MX6UL_PAD_CSI_DATA05__ECSPI1_SS0 	0x70a1
-				MX6UL_PAD_CSI_DATA06__ECSPI1_MOSI   	0x70a1
-				MX6UL_PAD_CSI_DATA07__ECSPI1_MISO   	0x70a1
-			>;
-		};
+//		pinctrl_ecspi: ecspigrp {
+//			fsl,pins = <
+//				MX6UL_PAD_CSI_DATA04__ECSPI1_SCLK      	0x70a1
+//				MX6UL_PAD_CSI_DATA05__ECSPI1_SS0 	0x70a1
+//				MX6UL_PAD_CSI_DATA06__ECSPI1_MOSI   	0x70a1
+//				MX6UL_PAD_CSI_DATA07__ECSPI1_MISO   	0x70a1
+//			>;
+//		};
 
 		pinctrl_sai2: sai2grp {
 			fsl,pins = <
