@@ -90,16 +90,16 @@
 			gpios = <&gpio4 14 0>;
 		};
 
-		GPIO_PWM {
-			gpio-export,name = "GPIO_PWM";
-			gpio-export,output = <0>;
-			gpios = <&gpio2 7 0>;
+		OPTO_1 {
+			gpio-export,name = "OPTO_1";
+//			gpio-export,output = <0>;
+			gpios = <&gpio1 15 0>;
 		};
 
-		GPIO_TM {
-			gpio-export,name = "GPIO_TM";
-			gpio-export,output = <0>;
-			gpios = <&gpio1 15 0>;
+		OPTO_2 {
+			gpio-export,name = "OPTO_2";
+//			gpio-export,output = <0>;
+			gpios = <&gpio2 7 0>;
 		};
 
 		UMTS_EN {
@@ -138,14 +138,14 @@
 			gpios = <&gpio4 26 1>; 
 		};	
 
-		NEW_INPUT_2 {
-			gpio-export,name = "NEW_INPUT_2";
+		REED {
+			gpio-export,name = "REED";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 27 1>; 
 		};	
 
-		NEW_INPUT_3 {
-			gpio-export,name = "NEW_INPUT_3";
+		BUTTON {
+			gpio-export,name = "BUTTON";
 			gpio-export,input = <0>;
 			gpios = <&gpio4 28 1>; 
 		};		
@@ -226,16 +226,16 @@
 				MX6UL_PAD_SNVS_TAMPER0__GPIO5_IO00   	0x1b0b0 /* WL_REF_ON */
 				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01   	0x1b0b0 /* BT_REF_ON */
 				MX6UL_PAD_NAND_CE1_B__GPIO4_IO14   		0x1b0b0 /* ETH_ALIM_EN */
-				MX6UL_PAD_ENET1_RX_ER__GPIO2_IO07		0x1b0b0 /* GPIO_PWM */
-				MX6UL_PAD_JTAG_TRST_B__GPIO1_IO15		0x1b0b0 /* JTAG_TRST */
+				MX6UL_PAD_ENET1_RX_ER__GPIO2_IO07		0x1b0b0 /* OPTO_2 */
+				MX6UL_PAD_JTAG_TRST_B__GPIO1_IO15		0x1b0b0 /* OPTO_1 */
 				MX6UL_PAD_GPIO1_IO02__GPIO1_IO02 		0x1b0b0 /* UMTS_EN */
 				MX6UL_PAD_SNVS_TAMPER5__GPIO5_IO05		0x1b0b0 /* UMTS_ON */
 				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25		0x1b0b0 /* UMTS_RESET */
 				MX6UL_PAD_SNVS_TAMPER4__GPIO5_IO04		0x1b0b0 /* UMTS_STATUS */
 				MX6UL_PAD_CSI_DATA04__GPIO4_IO25		0x1b0b0 /* NEW_INPUT_0 */
 				MX6UL_PAD_CSI_DATA05__GPIO4_IO26		0x1b0b0 /* NEW_INPUT_1 */
-				MX6UL_PAD_CSI_DATA06__GPIO4_IO27		0x1b0b0 /* NEW_INPUT_2 */
-				MX6UL_PAD_CSI_DATA07__GPIO4_IO28		0x1b0b0 /* NEW_INPUT_3 */
+				MX6UL_PAD_CSI_DATA06__GPIO4_IO27		0x1b0b0 /* REED */
+				MX6UL_PAD_CSI_DATA07__GPIO4_IO28		0x1b0b0 /* BUTTON */
 			>;
 		};
 		
