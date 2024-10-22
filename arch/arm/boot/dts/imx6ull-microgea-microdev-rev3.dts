@@ -92,13 +92,13 @@
 
 		OPTO_1 {
 			gpio-export,name = "OPTO_1";
-//			gpio-export,output = <0>;
+			gpio-export,output = <0>;
 			gpios = <&gpio1 15 0>;
 		};
 
 		OPTO_2 {
 			gpio-export,name = "OPTO_2";
-//			gpio-export,output = <0>;
+			gpio-export,output = <0>;
 			gpios = <&gpio2 7 0>;
 		};
 
